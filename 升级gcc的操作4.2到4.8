@@ -1,0 +1,15 @@
+操作步骤如下,一步步执行就好了
+
+wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+
+yum install devtoolset-2-gcc-4.8.2 devtoolset-2-gcc-c++-4.8.2
+
+/opt/rh/devtoolset-2/root/usr/bin/gcc --version
+
+yum install devtoolset-2-gcc-gfortran
+
+ln -s /opt/rh/devtoolset-2/root/usr/bin/* /usr/local/bin/
+
+hash -r   清除缓存
+
+gcc --version
