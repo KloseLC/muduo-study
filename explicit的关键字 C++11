@@ -1,0 +1,12 @@
+申明构造函数为显式构造函数
+防止1个参数的构造函数产生不伦不类的赋值构造
+例如
+
+class Test{
+ public:
+  public(int a);    /可以构造为  Test a =10;  加了explicit后就不行了
+};
+
+
+
+implicit  隐式构造 与explict相反
