@@ -1,0 +1,12 @@
+使用F3 from .vimrc中的配置
+map <F2> :NERDTreeToggle<CR>
+来召唤文本Tree
+
+连续切换文本使用方法:
+1 ctrl+w  左右切换光标,光标选中文本后 enter键确认切换,此方法反复可用
+
+能用快捷键解决的都是小问题
+
+
+
+
