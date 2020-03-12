@@ -1,0 +1,43 @@
+set shortmess+=c
+在vimrc里面添加这行 使插件注册C语言的模板
+
+
+ 92 "clang complete
+ 93 ""自动选择第一个匹配项但不插入到代码中
+ 94 let g:clang_auto_select = 1
+ 95 "在->. ., ::后自动补全
+ 96 let g:clang_complete_auto = 1
+ 97 ""发现错误之后打开QuickFix窗口
+ 98 let g:clang_complete_copen = 1
+ 99 "高亮警告和错误
+100 let g:clang_hl_errors = 1
+101 ""插入第一个补全后关闭预览窗口
+102 "let g:clang_close_preview = 1
+103 "开启对C++11的编译支持
+104 let g:clang_user_options = '-std=c++11'
+105 ""设定clang库路径
+106 "let g:clang_library_path = 'C:\Program Files (x86)\LLVM\bin'
+107 "补全预处理指令，宏和常数，默认为0，不补全
+108 let g:clang_complete_macros = 1
+109 ""补全代码模式，比如循环等，默认为0，不补全
+110 let g:clang_complete_patterns = 1
+111 "<C-]>跳转到声明
+112 "let g:clang_jumpto_declaration_key = "<C-]>"
+113 ""<C-w>]在预览窗口中打开声明
+114 let g:clang_jumpto_declaration_in_preview_key = "<C-w>]"
+115 "<C-t>回跳
+116 "let g:clang_jumpto_back_key = "<C-t>"
+117 ""使用UltiSnips进行代码片段补全
+118 "let g:clang_snippets = 1
+119 "let g:clang_snippets_engine = 'ultisnips'
+120 "let g:clang_user_options ='ultisnips'
+121 let g:clang_use_library = 1
+122 "let g:clang_user_options='|| exit 0'
+123 let g:clang_cpp_options = '-std=c++11 -stdlib=libc++'
+124 let g:clang_cpp_completeopt = 'longest,menuone,preview'
+125 let g:clang_c_options = '-std=gnu11'
+126 set shortmess+=c
+
+
+补全成功!
+百度死活找不到方法,还是google靠谱
