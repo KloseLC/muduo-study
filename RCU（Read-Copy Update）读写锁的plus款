@@ -1,0 +1,5 @@
+RCU（Read-Copy Update）模式:
+  如果对读写模式的性能有较高的要求,使用RCU模式是比较好的选择,普通的读写锁对比mutex互斥锁没有明显优势
+  但RCU比较适合多读少写的场景,如果写太多则开销太大.Linux内核使用的较多
+  
+参考来源:https://blog.csdn.net/linux_bug/article/details/48685403
