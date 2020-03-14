@@ -1,0 +1,25 @@
+什么是条件变量?
+
+存在五个接口
+
+/* 初始化一个条件变量 */
+int pthread_cond_init (pthread_cond_t* cond, pthread_condattr_t *cond_attr);
+ 
+/* 销毁一个条件变量 */
+int pthread_cond_destroy(pthread_cond_t* cond);
+ 
+/* 令一个消费者等待在条件变量上 */
+int pthread_cond_wait(pthread_cond_t* cond,pthread_mutex_t* _mutex);
+ 
+/* 生产者通知等待在条件变量上的消费者 */
+int pthread_cond_signal(pthread_cond_t* cond);
+ 
+/* 生产者向消费者广播消息 */
+int pthread_cond_broadcast(pthread_cond_t* cond);
+
+作用:
+condition variable通常和mutex互斥量一起使用,临界区内的等待和信号开放
+
+pthread_cond_wait  管理临界区的代码临时等待信号
+
+pthread_cond_signal  发送信号让等待中的临界区代码开始执行
