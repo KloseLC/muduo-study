@@ -1,0 +1,15 @@
+1\属于定义一个任意类型  类似于auto
+例如:
+  #define  MCHECK(x)   ({__typeof__(ret) errnum = (ret);  \
+                       if(!errnum)    \
+                          return true;})
+
+
+2\在宏中获取相关结构体的类型
+
+__typeof__ (x)  demo  = (x);
+
+
+
+
+主要做一个类型的申明的事情
