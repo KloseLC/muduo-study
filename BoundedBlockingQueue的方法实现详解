@@ -1,0 +1,11 @@
+BoundedBlockingQueue的实现方法:
+并非使用了标准STL的容器,还是在boost::circular_buffer基础上做了实现,和BoundedBlockingQueue的实现方法一致
+多了检测当前有界的状态和容量
+详细接口见boost wiki
+
+使用互斥和条件变量来控制同步
+
+
+都是多线程的利器
+
+
