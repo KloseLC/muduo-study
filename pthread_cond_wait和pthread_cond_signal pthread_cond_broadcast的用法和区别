@@ -1,0 +1,8 @@
+pthread_cond_wait  是针对已经注册的mutex 临界区进行条件变量暂停处理
+
+pthread_cond_signal 是放开一条进入临界区的条件变量暂停 
+
+pthread_cond_broadcast  是放开所有进入到临界区的暂停
+
+
+多线程的条件变量与临界区操作的三个接口
