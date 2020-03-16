@@ -1,0 +1,13 @@
+Blockqueue的实现分为:
+插入 put(T&)左值插入 put(T&&)右值插入
+
+弹出头部元素T take(),当没有元素的时候挂起
+
+计算元素数量 size()
+
+
+成员分为:
+mutable  mutex  非const成员互斥锁
+Condition   条件变量对象
+deque       队列
+
