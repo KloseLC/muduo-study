@@ -1,0 +1,16 @@
+one loop per thread 
+每一个事件循环一个线程的模式
+
+thread pool
+业务线程池
+
+Event loop
+事件循环
+
+file descriptor
+文件描述符
+
+round-robin
+轮询
+
+
