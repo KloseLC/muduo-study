@@ -1,0 +1,11 @@
+dynamic_pointer_cast是dynamic_pointer_cast的区别主要在于智能指针
+
+如果是智能指针:
+  dynamic_pointer_cast可以使用
+  dynamic_cast则编译不通过
+ 
+ 
+这个函数取代了虚函数的表达,可以强制将派生类的指针转换成鸡肋指针的方法引用
+
+
+如果是基类转派生,则会返回一个NULL指针
