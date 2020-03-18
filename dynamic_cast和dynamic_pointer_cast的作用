@@ -9,3 +9,8 @@ dynamic_pointer_cast是dynamic_pointer_cast的区别主要在于智能指针
 
 
 如果是基类转派生,则会返回一个NULL指针
+
+
+
+
+static_pointer_cast函数和dynamic_pointer_cast差不多,详细的差别还待了解区分
