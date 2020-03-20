@@ -1,0 +1,46 @@
+strust pollfd结构说明：
+
+typedef struct pollfd {
+        int fd;                               /* 需要被检测或选择的文件描述符*/
+        short events;                   /* 对文件描述符fd上感兴趣的事件 */
+        short revents;                  /* 文件描述符fd上当前实际发生的事件*/
+} pollfd_t;
+
+
+
+/保存触发事件的某个文件描述符相关的数据（与具体使用方式有关）
+ 
+typedef union epoll_data {
+    void *ptr;
+    int fd;
+    __uint32_t u32;
+    __uint64_t u64;
+} epoll_data_t;
+
+
+ //感兴趣的事件和被触发的事件
+struct epoll_event {
+    __uint32_t events; /* Epoll events */
+    epoll_data_t data; /* User data variable */
+};
+
+
+成员函数:
+  Timestamp now(Timestamp::now()) 初始化一个时间戳对象
+  Timestamp::now()获取时间戳的静态成员函数
+  
+  void PollPoller::fillActiveChannels(int numEvents,ChannelList* activeChannels) const;
+  有效的活动的业务通道处理模块
+  
+  void updateChannel(Channel* channel) override;
+  pollfds_成员的更新  先查找存在然后进行值的替换更新 并同步更新父类Poller的map存储
+    
+  
+成员变量:
+PollFdList pollfds_; epoll的描述符 vector容器
+
+
+继承关系:
+class PollPoller : public Poller
+
+
