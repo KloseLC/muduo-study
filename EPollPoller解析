@@ -1,0 +1,88 @@
+//保存触发事件的某个文件描述符相关的数据（与具体使用方式有关）
+ 
+typedef union epoll_data {
+    void *ptr;
+    int fd;
+    __uint32_t u32;
+    __uint64_t u64;
+} epoll_data_t;
+ //感兴趣的事件和被触发的事件
+struct epoll_event {
+    __uint32_t events; /* Epoll events */
+    epoll_data_t data; /* User data variable */
+};
+
+events可以是以下几个宏的集合：
+EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
+EPOLLOUT：表示对应的文件描述符可以写；
+EPOLLPRI：表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；
+EPOLLERR：表示对应的文件描述符发生错误；
+EPOLLHUP：表示对应的文件描述符被挂断；
+EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
+EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
+
+成员函数:
+  EPollPoller(EventLoop* loop);
+  epollfd_初始化创建poller
+  #include <sys/epoll.h>
+  int epoll_create1(int flags);
+  功能：创建一个多路复用的实例
+  参数：
+    flags：
+  0:如果这个参数是0，这个函数等价于poll_create（0）
+  EPOLL_CLOEXEC：这是这个参数唯一的有效值，如果这个参数设置为这个。那么当进程替换映像的时候会关闭这个文件描述符，这样新的映像中就无法对这个文件描述符操作，适用于多进程编程+映像替换的环境里
+  返回值：
+    success：返回一个非0 的未使用过的最小的文件描述符
+    error：-1 errno被设置
+    
+  EPollPoller::~EPollPoller()析构甘薯
+  ::close(epollfd_) 关闭epoll
+
+  Timestamp poll(int timeoutMs, ChannelList* activeChannels) override
+  拉起epoll的监控程序
+  nt epoll_wait(int epfd, struct epoll_event *events,int maxevents, int timeout);
+  功能：等待一个epoll队列中的文件描述符的I/O事件发生
+  参数：
+    epfd：目标epoll队列的描述符
+    events：用于放置epoll队列中准备就绪（被触发）的事件
+    maxevents：最大事件？
+    timeout：指定函数等待的时间。这个函数阻塞这么长一段时间之后接触阻塞。  
+  返回值：
+    >=0，表示准备就绪的文件描述符个数
+    -1：出错，errno被设置
+  
+  void updateChannel(Channel* channel) override
+  更新通道
+  void removeChannel(Channel* channel) override
+  移除通道
+
+  static const char* operationToString(int op);
+  返回操作类型的字符串 (EPOLL_CTL_ADD)ADD  (EPOLL_CTL_DEL)DEL   (EPOLL_CTL_MOD)MOD
+
+  void fillActiveChannels(int numEvents,ChannelList* activeChannels) const;
+  处理活跃的通道事件
+  
+  void update(int operation, Channel* channel);
+   更新通道事件
+   
+  
+
+
+
+
+
+
+
+成员变量:
+  static const int kInitEventListSize = 16;
+  支持最大16个事件列表
+  
+  typedef std::vector<struct epoll_event> EventList;
+  
+  int epollfd_;  epool描述符  启动epool的返回值
+  
+  EventList events_;epoll描述符处理集合
+  
+  
+继承关系:
+  
