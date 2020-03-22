@@ -1,0 +1,100 @@
+成员函数:
+  EventLoop()
+  初始化包括循环状态 退出状态  句柄状态  回调函数状态  线程ID   唤醒描述符  唤醒通道注册  当前活动通道设置为NULL,设置使能读取和回调读取初始化
+  
+  ~EventLoop()
+  
+  void loop()
+  拉起事件的loop 所以叫event loop,一个while循环的loop
+  
+  void quit()
+  将quit置为退出状态
+  
+  int64_t iteration()  返回循环次数
+  
+  Timestamp pollReturnTime 返回poll返回时间对象
+  
+  runInLoop(Functor cb)
+  执行loop的程序
+  
+  EventLoop::queueInLoop(Functor cb)
+  函数塞进队列的方法
+  
+  queueSize()  返回队列的处理方法
+  
+  TimerId EventLoop::runAt()
+  时间处理函数
+  
+  TimerId EventLoop::runAfter()
+  
+  TimerId EventLoop::runEvery(double interval, TimerCallback cb)  
+  
+  void EventLoop::cancel(TimerId timerId)
+  
+  void EventLoop::updateChannel(Channel* channel)
+  
+  void EventLoop::removeChannel(Channel* channel)
+  
+  bool EventLoop::hasChannel(Channel* channel)
+  
+  isInLoopThread()  获取当前线程的id
+  abortNotInLoopThread()  失败的日志打印接口,事件循环创建所在的线程id和正在执行的线程id输出
+  
+  handleRead()  读取唤醒文件描述符的id,如果长度不为uint64 则失败
+  
+  doPendingFunctors() 触发注册的functor事件
+  先将functors放到事件区中,然后逐一执行,使用函数模板来调用
+  
+  printActiveChannels()  打印正在执行的模块和通道
+      reventToString()将发生的事情以字符串方式打印出来
+  
+  void EventLoop::wakeup()  唤醒(每个net模块貌似都由自己的唤醒实现)
+  
+  void EventLoop::handleRead()
+    
+   
+成员变量:
+  typedef std::vector<Channel*> ChannelList;  事件处理通道列表
+  
+  bool looping_   loop拉起的状态开关,避免重复loop
+  
+  std::atomic<bool> quit_   退出的状态开关
+  
+  bool eventHandling_    对事件通道执行和清理的一个开关,如果不为false 则不能立刻remove
+   
+  bool callingPendingFunctors_  注册函数的处理状态结果
+   
+  int64_t iteration_;  事件通道计数器
+   
+  const pid_t threadId_;  线程ID
+
+  std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_)
+  
+  Channel* currentActiveChannel_
+  
+  ChannelList activeChannels_
+  
+  boost::any context_
+  
+  Timestamp pollReturnTime_
+  
+  std::unique_ptr<Poller> poller_
+  
+  std::unique_ptr<TimerQueue> timerQueue_
+  
+  int wakeupFd_
+
+  std::unique_ptr<Channel> wakeupChannel_
+
+  boost::any context_  
+  
+  ChannelList activeChannels_    活跃的通道列表
+    
+  Channel* currentActiveChannel_  活跃的通道指针
+  
+继承关系:
+    无继承关系
+    
+    
+    
+  
