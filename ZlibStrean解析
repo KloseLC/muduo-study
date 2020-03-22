@@ -27,3 +27,47 @@ ZlibInputStream
     int zerror_
     打包状态变量
       
+      
+      
+ZlibOutputStream
+    解压类的对象
+    ZlibOutputStream()初始化解包,详细说明在压缩包对象里面的链接有实现
+    
+    ~ZlibOutputStream()  析构函数,自动完成finish
+    
+    zlibErrorMessage()
+    返回解压的函数消息
+    
+    zlibErrorCode()
+    返回解压的失败错误码
+    
+    inputBytes()
+    获取zstream_.total_in
+    
+    outputBytes() 
+    获取zstream_.total_out
+    
+    
+    internalOutputBufferSize()
+    获取解压的数据长度
+    
+    write()
+    
+    
+    总结:
+        zlib库的解压好打包函数集合
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
