@@ -1,0 +1,29 @@
+ZlibInputStream
+成员函数:
+    explicit ZlibInputStream(Buffer* output)  
+      显示的构造函数  初始化类内存块
+      
+      
+      inflateInit() 
+      #include <zlib.h>  linux打包压缩的一个库
+      https://blog.csdn.net/ostar_liang/article/details/16898089?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task
+      zstream_ 里面有类结的说明
+      
+      bool write(StringPiece buf)
+      StringPiece类型的数据打包写入
+      bool write(Buffer* input)
+      Buffer对象指针的打包写入
+      
+      bool finish()
+      打包完成的接口
+      
+ 成员变量:
+    Buffer* output_
+    打包的输出buffer对象
+    
+    z_stream zstream_
+    打包的类型对象
+    
+    int zerror_
+    打包状态变量
+      
