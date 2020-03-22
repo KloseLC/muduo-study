@@ -68,25 +68,23 @@
    
   const pid_t threadId_;  线程ID
 
-  std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_)
+  std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_)   线程哟花的回调触发对象函数容器 管理事件触发
+ 
   
-  Channel* currentActiveChannel_
+  Timestamp pollReturnTime_   待review
   
-  ChannelList activeChannels_
+  std::unique_ptr<Poller> poller_  poll对象唯一指针
   
-  boost::any context_
+  std::unique_ptr<TimerQueue> timerQueue_  时间对象队列
   
-  Timestamp pollReturnTime_
-  
-  std::unique_ptr<Poller> poller_
-  
-  std::unique_ptr<TimerQueue> timerQueue_
-  
-  int wakeupFd_
+  int wakeupFd_  唤醒通道描述符
 
-  std::unique_ptr<Channel> wakeupChannel_
+  std::unique_ptr<Channel> wakeupChannel_  唤醒通道的唯一指针
 
   boost::any context_  
+   any功能与auto类似，二者不同之处在于：auto是一个类似int、double、string的C++关键字，它不是一个类，所以没有成员函数可调用，直接把他当做int、double、 
+   string这种关键字来使用。any是一个类，只能通过any_cast<>获得any的实际内部值，而不能像auto定义的对象那样直接使用它。
+   在any存储字符串的时候只能使用string，如any a = string("hello");，不能使用C风格的字符串，如：any a = "hello";
   
   ChannelList activeChannels_    活跃的通道列表
     
