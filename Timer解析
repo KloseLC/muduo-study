@@ -1,0 +1,45 @@
+基础类  
+
+函数成员:
+    Timer(TimerCallback cb, Timestamp when, double interval)
+        构造函数初始化关键数据
+        
+    void run() const
+        callback_();执行注册的回调函数
+        
+    Timestamp expiration()
+        返回到期数据
+        
+    bool repeat()
+        返回repeat
+    
+    int64_t sequence()
+        返回序列号
+    
+    void restart()
+        自加计数
+        
+    int64_t numCreated()
+        返回创建的次数  原子的int64
+       
+成员变量:
+    const TimerCallback callback_
+        callback_申明注册的回调函数
+        
+    Timestamp expiration_
+        Timestamp对象一个
+    
+    const double interval_
+        时间间隔参数
+    
+    const bool repeat_
+        重复参数
+    
+    const int64_t sequence_
+        序列参数
+
+    static AtomicInt64 s_numCreated_
+        计数参数
+    
+    
+    
