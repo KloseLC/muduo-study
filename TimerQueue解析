@@ -1,0 +1,70 @@
+TimerQueue对象
+
+
+成员函数:
+    TimerQueue()
+      负责初始化成员
+      创建定时器\定时器通道   
+ 
+    TimerId addTimer(TimerCallback cb,Timestamp when,double interval);
+        添加计时器对象到set容器 关联了addTimerInLoop 函数
+        
+    void cancel(TimerId timerId)  
+        撤销清除一个timer对象,如果是过期的计时器会添加到cancelingTimers_中
+        timers_的数量必须与activeTimers_一致
+        
+
+成员变量:
+    typedef std::pair<Timestamp, Timer*> Entry  模板类型的时间关联
+    
+    typedef std::set<Entry> TimerList        时间管理容器
+    
+    typedef std::pair<Timer*, int64_t> ActiveTimer;  活跃时间关联器
+    
+    typedef std::set<ActiveTimer> ActiveTimerSet  活跃时间管理器
+    
+    void addTimerInLoop(Timer* timer)   添加时间对象在loop 
+    
+    void cancelInLoop(TimerId timerId)   疑问与cancel(TimerId timerId) 的区别
+    
+    void handleRead()
+    
+    std::vector<Entry> getExpired(Timestamp now)  
+    
+    void reset(const std::vector<Entry>& expired, Timestamp now)
+    
+    bool insert(Timer* timer)
+    
+    EventLoop* loop_
+    
+    const int timerfd_    
+    
+    Channel timerfdChannel_
+    
+    TimerList timers_
+    
+    ActiveTimerSet activeTimers_
+    
+    bool callingExpiredTimers_
+    
+    ActiveTimerSet cancelingTimers_
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+    
