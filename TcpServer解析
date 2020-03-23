@@ -1,0 +1,149 @@
+
+
+网络模块的核心
+
+成员函数:
+    TcpServer()
+        构造函数初始化eventloop对象,关键网络参数 acceptor和线程池  连接回调函数的注册  消息回调函数的注册  并绑定连接回调
+        
+    ~TcpServer()
+        析构函数
+            主要负责将所有连接进行销毁 connectDestroyed
+            
+     const string& ipPort()
+        返回端口
+        
+     string& name()
+        返回名字
+        
+     EventLoop* getLoop()
+        返回EventLoop实例指针
+        
+     void setThreadNum(int numThreads)
+        设置线程数量
+        
+     void setThreadInitCallback(const ThreadInitCallback& cb)
+        设置线程注册回调函数
+        
+     
+     std::shared_ptr<EventLoopThreadPool> threadPool()
+        返回线程池的智能指针
+        
+     
+     void start()
+        开启监听端口,拉起服务 属于线程安全的
+        
+     void setConnectionCallback(const ConnectionCallback& cb)
+        设置连接回调函数
+        
+     void setMessageCallback(const MessageCallback& cb)
+        设置消息回调函数
+        
+     void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+        设置写入完成的回调函数
+        
+     void newConnection(int sockfd, const InetAddress& peerAddr)
+        对新连接进行事件的连接
+        
+     void removeConnection(const TcpConnectionPtr& conn)
+        移除连接
+        
+     void removeConnectionInLoop(const TcpConnectionPtr& conn)
+        在事件中移除连接
+        
+ 成员变量:
+     typedef std::map<string, TcpConnectionPtr> ConnectionMap
+        连接的信息标注池
+        
+     EventLoop* loop_;  // the acceptor loop
+        负责获取访问连接的循环
+        
+     const string ipPort_;
+        端口
+        
+     const string name_
+        名称,是关于连接的信息
+        
+     std::unique_ptr<Acceptor> acceptor_
+        Acceptor智能唯一指针
+        
+     std::shared_ptr<EventLoopThreadPool> threadPool_
+        EventLoopThreadPool事件轮询的智能指针
+       
+     ConnectionCallback connectionCallback_
+        连接回调函数的模板对象
+        
+     MessageCallback messageCallback_
+        消息回调函数的模板对象
+        
+     WriteCompleteCallback writeCompleteCallback_
+        写入完成的回调函数模板对象
+        
+     ThreadInitCallback threadInitCallback_
+        线程注册回调的模板函数对象
+        
+     AtomicInt32 started_
+        开始状态的原子性计数器变量
+        
+     int nextConnId_
+        下一个连接id的保存变量
+        
+     ConnectionMap connections_
+        连接信息的保存变量,用来保存当前连接的相关信息
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+        
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
