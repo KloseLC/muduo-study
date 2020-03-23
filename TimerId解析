@@ -1,0 +1,25 @@
+TimerId
+
+基础类timerid
+
+成员函数:
+    TimerId()
+        默认构造函数
+    
+    TimerId(Timer* timer, int64_t seq)
+        带参构造函数
+        
+    class TimerQueue
+        友类
+        
+        
+ 成员变量:
+    Timer* timer_
+      管理对象
+    
+    int64_t sequence_
+      序列数
+    
+    
+  继承关系:
+    muduo::copyable
