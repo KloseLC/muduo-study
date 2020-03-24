@@ -1,0 +1,320 @@
+连接信号的描述对象
+
+成员函数:
+    TcpConnection(EventLoop* loop,
+                             const string& nameArg,
+                             int sockfd,
+                             const InetAddress& localAddr,
+                             const InetAddress& peerAddr)
+                             
+   构造的四个参数为事件指针和名称\socket描述符  连接地址和身份地址
+   
+   ~TcpConnection() 
+   析构函数退出并将state_设置为关闭 断开连接
+   
+   const InetAddress& localAddress()
+   
+   const InetAddress& peerAddress() const { return peerAddr_; }
+   
+   bool connected() const { return state_ == kConnected; }
+     
+   bool disconnected() const { return state_ == kDisconnected; }
+   
+   bool getTcpInfo(struct tcp_info*) const
+      获取tcp信息
+      
+      struct tcp_info {
+	__u8	tcpi_state;		   //tcp state: TCP_SYN_SENT,TCP_SYN_RECV,TCP_FIN_WAIT1,TCP_CLOSE etc
+	__u8	tcpi_ca_state;     //congestion state：
+	__u8	tcpi_retransmits;  //重传数，表示当前待重传的包数，这个值在重传完毕后清零
+	__u8	tcpi_probes;		///* 持续定时器或保活定时器发送且未确认的段数*/
+	__u8	tcpi_backoff;		//用来计算持续定时器的下一个设计值的指数退避算法指数，在传送超时是会递增。
+	__u8	tcpi_options;		//tcp头部选项是否包含：扩展因子、时间戳、MSS等内容
+	__u8	tcpi_snd_wscale : 4, tcpi_rcv_wscale : 4; //扩展因子数值
+	__u8	tcpi_delivery_rate_app_limited:1;  //限速标志
+
+	__u32	tcpi_rto;		//重传超时时间，这个和RTT有关系，RTT越大，rto越大
+	__u32	tcpi_ato;		//用来延时确认的估值，单位为微秒. 
+							//在收到TCP报文时，会根据本次与上次接收的时间间隔来调整改制，在设置延迟确认定时器也会根据
+							//条件修改该值
+	__u32	tcpi_snd_mss;	// 本端的MSS
+	__u32	tcpi_rcv_mss;	// 对端的MSS
+
+	__u32	tcpi_unacked;	//未确认的数据段数
+	__u32	tcpi_sacked;    //2个含义：server端在listen阶段，可以接收连接的数量；收到的SACK报文数量
+	__u32	tcpi_lost;		//本端在发送出去被丢失的报文数。重传完成后清零
+	__u32	tcpi_retrans;   /* 重传且未确认的数据段数 */
+	__u32	tcpi_fackets;
+
+	/* Times. */
+	__u32	tcpi_last_data_sent;	//当前时间-最近一个包的发送时间，单位是毫秒
+	__u32	tcpi_last_ack_sent;     /* 未使用*/
+	__u32	tcpi_last_data_recv;	//当前时间-最近接收数据包的时间，单位是毫秒
+	__u32	tcpi_last_ack_recv;     //当前时间-最近接收ack的时间，单位是毫秒
+
+	/* Metrics. */
+	__u32	tcpi_pmtu;			/* 最后一次更新的路径MTU */
+	__u32	tcpi_rcv_ssthresh;   //当前接收窗口的大小
+	__u32	tcpi_rtt;			//smoothed round trip time,微妙	
+	__u32	tcpi_rttvar;		//描述RTT的平均偏差，该值越大，说明RTT抖动越大
+	__u32	tcpi_snd_ssthresh;  //拥塞控制慢开始阈值
+	__u32	tcpi_snd_cwnd;		//拥塞控制窗口大小
+	__u32	tcpi_advmss;		//本端的MSS上限
+	__u32	tcpi_reordering;	/* 没有丢包时，可以重新排序的数据段数 */
+
+	__u32	tcpi_rcv_rtt;		// 作为接收端，测出的RTT值，单位为微秒. 这个值不是对方计算并传送过来的rtt，而是作为接收端，在没发送数据的情况下
+								// 通过接收发送端发送的数据的情况计算得到的rtt值。在数据发送方，如果不接受数据，这个值一般情况下为0。
+	__u32	tcpi_rcv_space;		/* 当前接收缓存的大小 */
+
+	__u32	tcpi_total_retrans;  //统计总重传的包数，持续增长。
+
+	__u64	tcpi_pacing_rate;		//发送速率
+	__u64	tcpi_max_pacing_rate;	//最大发送速率，默认是unlimited，可以通过SO_MAX_PACING_RATE来设置
+	__u64	tcpi_bytes_acked;    /* RFC4898 tcpEStatsAppHCThruOctetsAcked */
+	__u64	tcpi_bytes_received; /* RFC4898 tcpEStatsAppHCThruOctetsReceived */
+	__u32	tcpi_segs_out;	     /* RFC4898 tcpEStatsPerfSegsOut */
+	__u32	tcpi_segs_in;	     /* RFC4898 tcpEStatsPerfSegsIn */
+
+	__u32	tcpi_notsent_bytes;
+	__u32	tcpi_min_rtt;
+	__u32	tcpi_data_segs_in;	/* RFC4898 tcpEStatsDataSegsIn */
+	__u32	tcpi_data_segs_out;	/* RFC4898 tcpEStatsDataSegsOut */
+
+	__u64   tcpi_delivery_rate;
+
+	__u64	tcpi_busy_time;      /* Time (usec) busy sending data */
+	__u64	tcpi_rwnd_limited;   /* Time (usec) limited by receive window */
+	__u64	tcpi_sndbuf_limited; /* Time (usec) limited by send buffer */
+};
+    tcp的详细属性
+    https://blog.csdn.net/dyingfair/article/details/95855952
+   
+   string getTcpInfoString() const
+      打印出获取的cpu信息字符串
+      
+   void send(const void* message, int len)
+   发送消息
+   
+   void send(const StringPiece& message)
+   发送StringPiece消息   
+   
+   疑问:为什么这么多类都有send函数,而且这个connection类为什么也会有?
+   
+   void send(Buffer* message);  // this one will swap data
+   不太懂  没细看
+   
+   void shutdown(); // NOT thread safe, no simultaneous calling
+   终止函数,socket的shutdown接口的封装
+   
+   void forceClose()
+   强制关闭连接
+   
+   void forceCloseWithDelay(double seconds)
+   延迟强制关闭
+   
+   void setTcpNoDelay(bool on)
+   设置tcp是否delay的接口,涉及setsockopt的函数选项
+   
+   void startRead()
+   开始读取的函数调用
+   
+   void stopRead()
+   停止读取的函数调用
+   
+   bool isReading() const { return reading_; }
+   查看当前状态是否在读取
+   
+   void setContext(const boost::any& context)
+   设置当前执行  准确的含义不明确
+   
+   const boost::any& getContext() const
+   获取当前执行  准确的含义不明确
+   
+   boost::any* getMutableContext()
+      获取可变的执行信息,准确的含义不明确
+      
+   void setConnectionCallback(const ConnectionCallback& cb)
+      设置连接回调
+      
+   void setMessageCallback(const MessageCallback& cb)
+      设置消息回调
+      
+   void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+      设置写入完成的回调
+      
+   void setHighWaterMarkCallback(const HighWaterMarkCallback& cb, size_t highWaterMark)
+      设置***回调    不明确
+      
+   Buffer* inputBuffer()
+      返回输入的buffer
+   
+    Buffer* outputBuffer()
+       返回输出的buffer
+       
+    void setCloseCallback(const CloseCallback& cb)
+        设置关闭回调的函数
+        
+    void connectEstablished()
+        连接确认
+        
+    void connectDestroyed()
+        连接断开
+        
+    enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting }
+        连接状态的申明
+        
+    void handleRead(Timestamp receiveTime);
+        读取readv  准确用途不明确
+        
+    void handleWrite()
+        scoket的write  准确用途不明确
+        
+    void handleClose()
+         关闭句柄,也就是描述符
+   
+    void handleError();
+        获取句柄的error信息
+        
+    void sendInLoop(const StringPiece& message)
+        发送write数据 这个是调用
+        
+    void sendInLoop(const void* message, size_t len)
+        同上,这个是实现
+        
+    void shutdownInLoop()
+        关闭句柄?不清楚
+        
+    void forceCloseInLoop()
+        强制关闭
+        
+    void setState(StateE s) { state_ = s; }
+        设置状态
+        
+    const char* stateToString() const
+        状态字符串形式返回
+        
+    void startReadInLoop()
+        开始读取
+        
+    void stopReadInLoop();
+        关闭读取
+        
+ 
+成员变量:
+      EventLoop* loop_
+          事件循环注册指针
+          
+      const string name_
+          名称
+          
+      StateE state_;  // FIXME: use atomic variable
+          当前状态
+       
+      bool reading_
+          不知做什么用
+          
+          
+      std::unique_ptr<Socket> socket_
+          唯一socket指针
+      
+      std::unique_ptr<Channel> channel_
+          唯一通道指针
+      
+      const InetAddress localAddr_
+          和peer的区别不知道
+      
+      const InetAddress peerAddr_
+          详细地址,不确定
+      
+      ConnectionCallback connectionCallback_
+          连接回调函数
+      
+      MessageCallback messageCallback_
+          消息回调函数
+      
+      WriteCompleteCallback writeCompleteCallback_
+          写入完成回调函数
+      
+      HighWaterMarkCallback highWaterMarkCallback_
+          写入标记回调函数
+      
+      CloseCallback closeCallback_
+          关闭回调
+      
+      size_t highWaterMark_
+          前置标记
+      
+      Buffer inputBuffer_
+          输入的buff保存
+      
+      Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer
+          输出的buff保存
+      
+      boost::any context_
+          文本对象
+      
+      
+        
+        
+        
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+       
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+      
+   
+   
+   
+   
