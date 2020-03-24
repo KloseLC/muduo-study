@@ -1,0 +1,81 @@
+from  SocketsOps文件下的公共接口
+
+
+int createNonblockingOrDie(sa_family_t family)
+    创建无阻塞的socket 描述符
+    里面有一系列的操作还需要详细看 不知道or  die是什么含义
+    
+void bindOrDie(int sockfd, const struct sockaddr* addr)
+    绑定端口
+    里面有一系列的操作还需要详细看 不知道or  die是什么含义
+    
+void listenOrDie(int sockfd)
+    监听端口
+    里面有一系列的操作还需要详细看 不知道or  die是什么含义
+    
+int  accept(int sockfd, struct sockaddr_in6* addr)
+    获取一个socket
+    
+ssize_t read(int sockfd, void *buf, size_t count)
+    socket::read
+
+ssize_t readv(int sockfd, const struct iovec *iov, int iovcnt)
+    socket::readv
+
+ssize_t write(int sockfd, const void *buf, size_t count)
+    write linuxapi封装
+
+void close(int sockfd)
+    linux接口close封装
+
+void shutdownWrite(int sockfd)
+    sockets::shutdownWrite封装
+    
+    
+void toIpPort(char* buf, size_t size,
+              const struct sockaddr* addr);
+         将ip和port进行格式化如buff的工具
+void toIp(char* buf, size_t size,
+          const struct sockaddr* addr);
+    表达式ip转换成2进制的接口 ipv4 ipv6都可以使用
+
+void fromIpPort(const char* ip, uint16_t port,
+                struct sockaddr_in* addr);
+    ipv4的接口   还是表达转二进制   为什么要设置这么多接口处理     
+     
+void fromIpPort(const char* ip, uint16_t port,
+                struct sockaddr_in6* addr);
+    ipv6的接口  还是表达转二进制
+
+int getSocketError(int sockfd)
+    获取最新的socket异常码
+   
+const struct sockaddr* sockaddr_cast(const struct sockaddr_in* addr)
+    强转sockaddr_in为sockaddr
+
+const struct sockaddr* sockaddr_cast(const struct sockaddr_in6* addr)
+    强转sockaddr_in6为sockaddr
+
+struct sockaddr* sockaddr_cast(struct sockaddr_in6* addr)
+    强转sockaddr_in6为非const  sockaddr        
+
+const struct sockaddr_in* sockaddr_in_cast(const struct sockaddr* addr)
+    sockaddr为sockaddr_in
+
+const struct sockaddr_in6* sockaddr_in6_cast(const struct sockaddr* addr)
+    sockaddr为sockaddr_in6
+
+struct sockaddr_in6 getLocalAddr(int sockfd)
+    获取socket地址
+    
+struct sockaddr_in6 getPeerAddr(int sockfd)
+     获取socket地址ipv6
+
+bool isSelfConnect(int sockfd)
+     比较local和peer两个地址是否一致
+
+
+
+
+
+
