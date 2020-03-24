@@ -1,0 +1,27 @@
+基础类
+Poller(EventLoop* loop)
+    仅仅初始化了  ownerLoop_
+    
+virtual ~Poller();
+    被设置为default
+    
+virtual Timestamp poll(int timeoutMs, ChannelList* activeChannels) = 0;
+    纯虚
+    
+virtual void updateChannel(Channel* channel) = 0;
+
+
+virtual void removeChannel(Channel* channel) = 0;
+
+virtual bool hasChannel(Channel* channel) const
+      查询返回channel对应的poller
+      
+static Poller* newDefaultPoller(EventLoop* loop)
+      根据定义的宏MUDUO_USE_POLL  生成PollPoller or  EPollPoller
+      
+
+成员变量:
+      typedef std::map<int, Channel*> ChannelMap;
+      ChannelMap channels_;
+
+      EventLoop* ownerLoop_;
