@@ -1,0 +1,97 @@
+tcp客户端的类
+
+成员函数:
+    TcpClient(EventLoop* loop,const InetAddress& serverAddr,const string& nameArg);
+        构造函数,用于注册回调和初始化关键数据和建立新的连接对象connection
+        
+    ~TcpClient()
+        析构函数
+            将关键参数置为false并移除connection并强制关闭
+            
+     void connect()
+        连接服务器
+        
+     void disconnect()
+        断开连接服务器
+        
+     void stop()
+        关闭服务器
+     
+    TcpConnectionPtr connection() const
+        返回connection对象
+        
+    EventLoop* getLoop() const
+        返回loop对象
+        
+    bool retry() const 
+        返回重试的变量
+        
+    void enableRetry()
+        设置重试
+        
+    const string& name() const
+        返回name
+        
+    void setConnectionCallback(ConnectionCallback cb)
+        设置连接回调
+        
+    void setMessageCallback(MessageCallback cb)
+        设置消息回调
+        
+    void setWriteCompleteCallback(WriteCompleteCallback cb)
+        设置写入完成回调
+        
+    void newConnection(int sockfd)
+        初始化一个connection  包含消息注册对象申请 地址信息实例化等等
+        
+    void removeConnection(const TcpConnectionPtr& conn)
+        清除connection
+        
+    EventLoop* loop_
+        轮询对象
+        
+    ConnectorPtr connector_
+        ConnectorPtr 智能指针对象
+        
+    const string name_
+        应该是客户端名称
+        
+    ConnectionCallback connectionCallback_
+        连接回调函数
+    
+    MessageCallback messageCallback_
+        消息回调函数
+        
+    WriteCompleteCallback writeCompleteCallback_
+        写入完成回调函数
+        
+    bool retry_
+        重试变量
+    
+    bool connect_
+        连接状态变量
+        
+    int nextConnId_
+        新的连接id变量
+    
+    mutable MutexLock mutex_
+        互斥锁
+        
+    TcpConnectionPtr connection_ GUARDED_BY(mutex_)
+        TcpConnectionPtr  连接对象
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
