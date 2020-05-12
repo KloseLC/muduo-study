@@ -11,3 +11,7 @@ struct hostent
 
 
 常用来获取主机的信息 
+
+gethostbyname_r
+根据域名和主机名获取服务器信息返回hostent对象的一个系统级接口
+
