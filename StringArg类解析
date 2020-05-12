@@ -1,0 +1,11 @@
+StringArg
+成员函数:
+    StringArg(const char* str)
+    StringArg(const string& str)
+    两个都是带参构造
+    
+    const char* c_str() const { return str_; }
+    返回匹配C语法字符串类型的const char指针
+    
+成员变量:
+  const char* str_;
