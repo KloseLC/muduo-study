@@ -37,7 +37,10 @@
   
   bool EventLoop::hasChannel(Channel* channel)
   
+  void assertInLoopThread()   判断是否有线程ID 是否是在线程池中的 如果没有线程ID则为0
+  
   isInLoopThread()  获取当前线程的id
+  
   abortNotInLoopThread()  失败的日志打印接口,事件循环创建所在的线程id和正在执行的线程id输出
   
   handleRead()  读取唤醒文件描述符的id,如果长度不为uint64 则失败
