@@ -1,0 +1,3 @@
+相比较static_case的类型转换  implicit_cast会更安全,他会检查基类向字节的转换,严格限制
+
+static很多允许的转换,implicit不会允许
