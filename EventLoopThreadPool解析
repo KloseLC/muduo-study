@@ -1,0 +1,50 @@
+EventLoopThread类  事件循环线程类
+
+EventLoopThreadPool(EventLoop* baseLoop, const string& nameArg)
+  构造函数,事件指针和事件名称作为初始化元素
+  初始化状态机     started_
+  初始化线程编号  初始化线程池的数量为0
+  初始化next_暂时不知道做什么的
+
+ ~EventLoopThreadPool()
+ 析构函数
+ 
+  void setThreadNum(int numThreads) { numThreads_ = numThreads; }
+  设置线程池里的线程数量
+  
+  void start(const ThreadInitCallback& cb = ThreadInitCallback());
+  开始函数 
+  创建指定事件的线程名称和线程编号  push到vector中去
+  如果线程数量为0和回调函数返回为true  则直接回调结束
+  
+  EventLoop* getNextLoop();
+  获取的轮询线程元素  开始为初始化的loop  如果超过了最大个数  则重置为0 重新开始
+  
+  EventLoop* getLoopForHash(size_t hashCode);
+  使用哈希方法获取元素
+  实际为传入的hash位置与max的余数位置的元素
+  
+  std::vector<EventLoop*> getAllLoops()
+  返回容器本身的指针  如果没有任何元素,则返回初始化的那个loop元素
+  
+    bool started() const
+  { return started_; }
+  
+    const string& name() const
+  { return name_; }
+  
+  类成员对象:
+  EventLoop* baseLoop_;
+  string name_;
+  bool started_;
+  int numThreads_;
+  int next_;
+  std::vector<std::unique_ptr<EventLoopThread>> threads_;
+  std::vector<EventLoop*> loops_;
+  
+  
+  
+  
+  
+  
+  
