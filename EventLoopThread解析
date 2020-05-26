@@ -1,0 +1,32 @@
+EventLoopThread 事件循环线程  
+  类成员函数:
+  EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),const string& name = string());
+      初始化回调函数 
+
+   ~EventLoopThread()
+   析构的时候 exiting置位true 状态机修改
+   如果loop不为NULL则退出loop和thread_线程等待终止结束
+   
+   EventLoop* startLoop()
+   线程开启的逻辑开关,实际的行为操作在threadFunc中 如果loop_对象指针违背初始化则 cond_会一直等待 如果不会NULL 则将值赋值给loop
+   
+    void threadFunc();
+   如果回调函数指针为true 则直接使用回调函数启动事件 
+   
+   
+   类成员对象:
+  EventLoop* loop_ GUARDED_BY(mutex_)
+  
+  bool exiting_;
+  退出的状态机 
+  
+  Thread thread_;
+  线程对象
+  
+  MutexLock mutex_;
+  锁对象
+  
+  Condition cond_ GUARDED_BY(mutex_)
+  
+  ThreadInitCallback callback_
+   
