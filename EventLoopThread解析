@@ -16,6 +16,7 @@ EventLoopThread 事件循环线程
    
    类成员对象:
   EventLoop* loop_ GUARDED_BY(mutex_)
+    给成员设置属性的 attribute 操作  详细的操作功能未知
   
   bool exiting_;
   退出的状态机 
@@ -27,6 +28,7 @@ EventLoopThread 事件循环线程
   锁对象
   
   Condition cond_ GUARDED_BY(mutex_)
+  给成员设置属性的 attribute 操作  详细的操作功能未知
   
   ThreadInitCallback callback_
-   
+   回调函数指针对象
