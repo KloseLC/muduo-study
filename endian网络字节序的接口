@@ -1,3 +1,13 @@
+endian 字节序处理
+
+网络字节序的处理函数,一般只在TCP/IP的网络编程上使用较多
+例如  htobe64  host to be(不知道)
+
+例如 htonl 代表着 32位数据的转换  host  to  network
+htons    代表着 16位数据的转换   host to  short
+
+下面的接口目前还不清楚,作为字节序转换工具存在而已 
+
 inline uint64_t hostToNetwork64(uint64_t host64)
 {
   return htobe64(host64);
