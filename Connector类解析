@@ -1,0 +1,66 @@
+connector
+成员函数:
+  typedef std::function<void (int sockfd)> NewConnectionCallback; 定义新的连接回调
+  
+  Connector(EventLoop* loop, const InetAddress& serverAddr);事件和地址构造 然后初始化连接状态
+  
+  void setNewConnectionCallback(const NewConnectionCallback& cb)  设置回调返回
+  
+  void start()
+  开始动作,将连接设置为true 然后调用loop的runInLoop 
+  
+  void restart()
+  判断是否还在执行事件循环
+  重新设置断开连接状态
+  设置delay时间
+  设置是否连接的判断并尝试连接  进入connect流程
+  
+  stopInLoop()
+  停止时间循环
+  先判断事件是否还在循环中
+  判断状态是否是连接中,如果是则设置为断开连接
+  移除通道的并获取返回的描述符fd
+  重置通道到事件队列里面
+  
+  void connect()
+  创建无阻塞的socket  
+  然后连接地址
+  如果有错误打印出错误的errorno
+  
+  void connecting(int sockfd)
+  设置连接状态为连接中
+  并将channel根据socket描述符进行重置
+  并设置好write回调函数和error回调函数
+  最后使能写入
+  
+  void handleWrite()
+  写入handle还没弄太明白
+  夏娜判定是否是连接中的状态
+  如果不是则判定是否已经断开连接 如果都不是则断言报错
+  
+  如果是连接中的状态,移除并重置通道
+  如果重置之后有error或者ip地址比较后不一致则重新尝试连接
+  
+  如果没问题则设置状态为已连接
+  设置连接回调,否则关闭连接
+  
+  void handleError()
+  打印连接状态,如果状态为连接中 则移除通道并重新尝试连接
+  
+  
+  void retry(int sockfd)
+  重试尝试连接
+  先关闭旧的socket 设置连接状态为断开
+  然后再判断当前为连接操作后,打印连接打印的地址和端口 和设置下次连接的时间  delayMS
+  
+  int removeAndResetChannel()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
