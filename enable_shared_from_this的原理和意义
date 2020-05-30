@@ -1,0 +1,41 @@
+如果做维护一个基类实现继承的场景,是为了帮助派生类返回一个this的智能指针 
+
+
+如果按照一般思路,返回一个对象的智能this指针,会造成问题,即两个互不相干的this智能指针,指针的两次自动析构 会导致崩溃
+
+
+如 
+
+
+class A{
+public:
+  A(){
+  }
+  ~A(){
+  }
+  
+  share_ptr<A> getPtr){
+    return std::share_ptr<A>(this);
+  }
+}
+
+int main(){
+  share_ptr<A> share_p1(new A);
+  share_ptr<A> share_p2 = share_p1->getPtr();   //析构的时候崩溃
+}
+
+
+正确的实现  
+ class A:public enble_shared_from_this<A>{
+public:
+  A(){
+  }
+  ~A(){
+  }
+  
+  share_ptr<A> getPtr){
+    return shared_from_this();
+  }
+}
+
+适用场景,出现在保活场景下  会有这类应用  比如异步的调用  将回调指针进行赋值 
