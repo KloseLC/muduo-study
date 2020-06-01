@@ -1,0 +1,35 @@
+unique的指针   需要的头文件#include<memory>
+
+reset()函数作用为重置该指针为NULL并delete关联指针
+
+release() 仅仅是将unique指向的关联指针设置为NULL 并不delete关联指针,
+
+get()  仅仅是得到关联的指针
+
+
+#include <iostream>
+#include <memory>
+using namespace std;
+
+
+
+int main() {
+	int a = 10;
+	std::unique_ptr<int> p1 = make_unique<int>(a);
+
+	//p1.reset();
+	cout << "p1 : " << *p1 << endl;
+	cout << "a  : " << &a << endl;
+	//int* p2 = p1.release();
+	int* p2 = p1.get();
+	if (p1 != nullptr) {
+		cout << "a _ptr : " << *p1 << endl;
+		cout << "p2 : " << p2 << endl;
+	}else {
+		cout << "a  : " << a << endl;
+		cout << "p2 : " << *p2 << endl;
+	}
+	
+	system("pause");
+	return 0;
+}
