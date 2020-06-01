@@ -54,7 +54,19 @@ connector
   然后再判断当前为连接操作后,打印连接打印的地址和端口 和设置下次连接的时间  delayMS
   
   int removeAndResetChannel()
+  移除事件实例,并重置通道
   
+  void resetChannel()
+  重置通道,unique_ptr指针使用reset进行重置
+  
+  成员变量:
+  EventLoop* loop_   loop指针对象
+  InetAddress serverAddr_   服务器地址
+  bool connect_; // atomic  状态
+  States state_;  // FIXME: use atomic variable  状态
+  std::unique_ptr<Channel> channel_  通道指针
+  NewConnectionCallback newConnectionCallback_ 回调函数对象
+  int retryDelayMs_  重连delay时间
   
   
   
