@@ -1,0 +1,39 @@
+Channel 用来抽象时间通道和事件通道和单例通道描述符
+
+  typedef std::function<void()> EventCallback
+  typedef std::function<void(Timestamp)> ReadEventCallback
+  
+成员函数:
+    Channel(EventLoop* loop, int fd)
+    主要是成员变量的初始化
+    
+    ~Channel()
+    检查事件句柄和addloop事件是否完成  是否存在于事件循环进程当中
+    
+    void handleEvent(Timestamp receiveTime)
+    
+    void setReadCallback(ReadEventCallback cb)
+    { readCallback_ = std::move(cb); }
+  
+    void setWriteCallback(EventCallback cb)
+    { writeCallback_ = std::move(cb); }
+  
+    void setCloseCallback(EventCallback cb)
+    { closeCallback_ = std::move(cb); }
+  
+    void setErrorCallback(EventCallback cb)
+    { errorCallback_ = std::move(cb); }
+    
+    
+    
+void Channel::tie(const std::shared_ptr<void>& obj)
+初始化tie_ 和 tied_为true
+
+void Channel::update()
+设置addedToLoop_为true
+
+
+    
+    
+    
+    
