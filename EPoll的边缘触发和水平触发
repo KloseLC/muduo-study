@@ -1,0 +1,17 @@
+EPOLLIN     可读
+EPOLLOUT    可写
+EPOLLPRI    紧急数据读取
+EPOLLERR    在关联的文件描述符上有错误情况发生
+EPOLLHUP    关联的文件描述符已挂起
+EPOLLET     设置触发方式为边缘触发,默认为水平触发
+EPOLLONESHOT     设置one-shot模式,触发一次事件后,该描述符会在轮询对象内部被禁用
+EPOLLEXCLUSIVE   当已关联的描述符发生事件时,仅唤醒一个epoll对象.默认(如果未设置此标志)是唤醒所有轮询该描述符的epoll对象
+EPOLLRDHUP       流套接字的对侧关闭了连接或关闭了写入到一半的连接
+EPOLLRDNORM      等同于EPOLLOUT
+EPOLLRDBAND      可以读取优先数据带
+EPOLLWRNORM      等同于 EPOLLOUT
+EPOLLWRBAND      可以写入优先级数据
+EPOLLMSG         忽略
+
+3.6 新版功能: 增加了 EPOLLEXCLUSIVE。仅支持 Linux Kernel 4.5 或更高版本
+
