@@ -1,0 +1,67 @@
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
+以上是C++11的站位符号申明   用来站位形参的空位
+
+
+template<typename T>
+inline T* get_pointer(const std::shared_ptr<T>& ptr)
+{
+  return ptr.get();
+}
+
+
+template<typename T>
+inline T* get_pointer(const std::unique_ptr<T>& ptr)
+{
+  return ptr.get();
+}
+
+两个返回指针模板 只不过一个是普通智能 一个是唯一智能
+
+template<typename To, typename From>
+inline ::std::shared_ptr<To> down_pointer_cast(const ::std::shared_ptr<From>& f) {
+  if (false)   //这里貌似很多余
+  {
+    implicit_cast<From*, To*>(0);
+  }
+
+#ifndef NDEBUG
+  assert(f == NULL || dynamic_cast<To*>(get_pointer(f)) != NULL);  判断是否会转换失败
+#endif
+  return ::std::static_pointer_cast<To>(f);
+}
+
+static_pointer_cast用来进行智能指针的转换
+
+class Buffer;
+class TcpConnection;
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
+typedef std::function<void()> TimerCallback;
+typedef std::function<void (const TcpConnectionPtr&)> ConnectionCallback;
+typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
+typedef std::function<void (const TcpConnectionPtr&)> WriteCompleteCallback;
+typedef std::function<void (const TcpConnectionPtr&, size_t)> HighWaterMarkCallback;
+
+// the data has been read to (buf, len)
+typedef std::function<void (const TcpConnectionPtr&,
+                            Buffer*,
+                            Timestamp)> MessageCallback;
+
+void defaultConnectionCallback(const TcpConnectionPtr& conn);
+void defaultMessageCallback(const TcpConnectionPtr& conn,
+                            Buffer* buffer,
+                            Timestamp receiveTime);
+                            
+以上都是函数指针的别名
+
+void muduo::net::defaultConnectionCallback(const TcpConnectionPtr& conn)
+打印默认连接信息和状态的函数
+
+void muduo::net::defaultMessageCallback(const TcpConnectionPtr&,
+                                        Buffer* buf,
+                                        Timestamp)
+操作了buff对象的操作赋值,但是默认的消息操作暂时还没看出来
+                                        
+                                        
