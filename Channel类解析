@@ -31,9 +31,65 @@ void Channel::tie(const std::shared_ptr<void>& obj)
 
 void Channel::update()
 设置addedToLoop_为true
+更新通道对象
+
+int fd() const { return fd_; }
+     
+int events() const { return events_; } 
+
+  void set_revents(int revt) { revents_ = revt; } // used by pollers
+  // int revents() const { return revents_; }
+  
+  bool isNoneEvent() const { return events_ == kNoneEvent; }
+    
+  void enableReading() { events_ |= kReadEvent; update(); }
+  
+  void disableReading() { events_ &= ~kReadEvent; update(); }
+  void enableWriting() { events_ |= kWriteEvent; update(); }
+  void disableWriting() { events_ &= ~kWriteEvent; update(); }
+  void disableAll() { events_ = kNoneEvent; update(); }
+  bool isWriting() const { return events_ & kWriteEvent; }
+  bool isReading() const { return events_ & kReadEvent; }
+  
+    int index() { return index_; }
+  void set_index(int idx) { index_ = idx; }
+  
+  string reventsToString() const
+  将fd和revents的值通关与,得到信息并打印
+  
+  string eventsToString() const
+  将fd和events通过与判断 得到字符串信息
+  
+  void doNotLogHup() { logHup_ = false; }
+
+  EventLoop* ownerLoop() { return loop_; }
+
+  void remove()
+  将当前事件通道进行移除关闭
+  
+  static string eventsToString(int fd, int ev)
+  信息打印字符串函数
+  
+成员变量:
+  
+  static const int kNoneEvent;
+  static const int kReadEvent;
+  static const int kWriteEvent;
+  fd操作的状态机变量
+
+  EventLoop* loop_  事件对象
+  const int  fd_  描述符
+  int        events_;
+  int        revents_; // it's the received event types of epoll or poll
+  int        index_; // used by Poller.
+  bool       logHup_;
 
 
-    
-    
-    
-    
+ std::weak_ptr<void> tie_;
+  bool tied_;
+  bool eventHandling_;
+  bool addedToLoop_;
+  ReadEventCallback readCallback_;
+  EventCallback writeCallback_;
+  EventCallback closeCallback_;
+  EventCallback errorCallback_;
