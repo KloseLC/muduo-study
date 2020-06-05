@@ -1,0 +1,9 @@
+指定一个字符串,目标字符,和字符串长度
+
+查找当中第一个目标字符所在的地址,并返回该指针
+
+
+如果没有则返回NULL
+
+
+void *memchr(const void *str, int c, size_t n)
