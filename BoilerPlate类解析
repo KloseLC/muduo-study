@@ -1,0 +1,13 @@
+namespace muduo
+{
+namespace net
+{
+
+class BoilerPlate : noncopyable
+{
+ public:
+
+ private:
+};
+
+啥都没有
