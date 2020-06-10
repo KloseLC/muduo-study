@@ -1,0 +1,13 @@
+Poller* Poller::newDefaultPoller(EventLoop* loop)
+{
+  if (::getenv("MUDUO_USE_POLL"))
+  {
+    return new PollPoller(loop);
+  }
+  else
+  {
+    return new EPollPoller(loop);
+  }
+}
+
+仅仅是返回一个poll对象,类型根据全局变量来选择
