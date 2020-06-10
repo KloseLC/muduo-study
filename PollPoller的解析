@@ -1,0 +1,136 @@
+PollPoller
+成员函数:
+PollPoller::PollPoller(EventLoop* loop)
+  : Poller(loop)
+{
+成员初始化
+
+PollPoller::~PollPoller() = default;  
+//析构函数设置default只为了提升效率
+
+Timestamp PollPoller::poll(int timeoutMs, ChannelList* activeChannels)
+{
+  // XXX pollfds_ shouldn't change
+  int numEvents = ::poll(&*pollfds_.begin(), pollfds_.size(), timeoutMs);
+  numEvents表示返回就绪的fd个数  pollfds_.begin()第一个元素的地址指针,设定的元素个数,timeoutMs超时时间
+  int savedErrno = errno;
+  Timestamp now(Timestamp::now());
+  时间类的初始化
+  if (numEvents > 0)
+  {
+    LOG_TRACE << numEvents << " events happened";
+    fillActiveChannels(numEvents, activeChannels);
+    表示事件已经发生,遍历其中的描述符,并将描述符根据查找出channel,并将有效通道放入activeChannel中去
+  }
+  else if (numEvents == 0)
+  {
+    LOG_TRACE << " nothing happened";
+  }
+  else
+  {
+    if (savedErrno != EINTR)
+    {
+      errno = savedErrno;
+      LOG_SYSERR << "PollPoller::poll()";
+    }
+  }
+  return now;
+}
+
+void PollPoller::fillActiveChannels(int numEvents,
+                                    ChannelList* activeChannels) const
+{
+  for (PollFdList::const_iterator pfd = pollfds_.begin();
+      pfd != pollfds_.end() && numEvents > 0; ++pfd)
+  {
+    if (pfd->revents > 0)
+    {
+      --numEvents;
+      ChannelMap::const_iterator ch = channels_.find(pfd->fd);
+      assert(ch != channels_.end());
+      Channel* channel = ch->second;
+      assert(channel->fd() == pfd->fd);
+      channel->set_revents(pfd->revents);
+      // pfd->revents = 0;
+      activeChannels->push_back(channel);
+    }
+  }
+}
+遍历出现改变的描述符,并获得有效通道信息
+
+
+void PollPoller::updateChannel(Channel* channel)
+{
+  Poller::assertInLoopThread();
+  LOG_TRACE << "fd = " << channel->fd() << " events = " << channel->events();
+  if (channel->index() < 0)
+  {
+    // a new one, add to pollfds_
+    assert(channels_.find(channel->fd()) == channels_.end());
+    struct pollfd pfd;
+    pfd.fd = channel->fd();
+    pfd.events = static_cast<short>(channel->events());
+    pfd.revents = 0;
+    pollfds_.push_back(pfd);
+    int idx = static_cast<int>(pollfds_.size())-1;
+    channel->set_index(idx);
+    channels_[pfd.fd] = channel;
+  }
+  else
+  {
+    // update existing one
+    assert(channels_.find(channel->fd()) != channels_.end());
+    assert(channels_[channel->fd()] == channel);
+    int idx = channel->index();
+    assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
+    struct pollfd& pfd = pollfds_[idx];
+    assert(pfd.fd == channel->fd() || pfd.fd == -channel->fd()-1);
+    pfd.fd = channel->fd();
+    pfd.events = static_cast<short>(channel->events());
+    pfd.revents = 0;
+    if (channel->isNoneEvent())
+    {
+      // ignore this pollfd
+      pfd.fd = -channel->fd()-1;
+    }
+  }
+}
+如果未设置index参数,则设置一个pollfd的元素数量为index  如果index被初始化 则检查数据的有效性,并将结果更新
+
+void PollPoller::removeChannel(Channel* channel)
+{
+  Poller::assertInLoopThread();
+  LOG_TRACE << "fd = " << channel->fd();
+  assert(channels_.find(channel->fd()) != channels_.end());
+  assert(channels_[channel->fd()] == channel);
+  assert(channel->isNoneEvent());
+  int idx = channel->index();
+  assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
+  const struct pollfd& pfd = pollfds_[idx]; (void)pfd;
+  assert(pfd.fd == -channel->fd()-1 && pfd.events == channel->events());
+  size_t n = channels_.erase(channel->fd());
+  assert(n == 1); (void)n;
+  if (implicit_cast<size_t>(idx) == pollfds_.size()-1)
+  {
+    pollfds_.pop_back();
+  }
+  else
+  {
+    int channelAtEnd = pollfds_.back().fd;
+    iter_swap(pollfds_.begin()+idx, pollfds_.end()-1);
+    if (channelAtEnd < 0)
+    {
+      channelAtEnd = -channelAtEnd-1;
+    }
+    channels_[channelAtEnd]->set_index(idx);
+    pollfds_.pop_back();
+  }
+}
+判断通道的有效性之后,在channels_和pollfds_中删除
+
+
+成员变量:
+    typedef std::vector<struct pollfd> PollFdList;
+    需要监控的描述符列表
+    PollFdList pollfds_;
+
