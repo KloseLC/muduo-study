@@ -1,0 +1,45 @@
+WeakCallback
+成员函数:
+    WeakCallback(const std::weak_ptr<CLASS>& object,
+               const std::function<void (CLASS*, ARGS...)>& function)
+    : object_(object), function_(function)
+  {
+  }
+  初始化
+  
+    void operator()(ARGS&&... args) const
+  {
+    std::shared_ptr<CLASS> ptr(object_.lock());
+    if (ptr)
+    {
+      function_(ptr.get(), std::forward<ARGS>(args)...);
+    }
+    // else
+    // {
+    //   LOG_TRACE << "expired";
+    // }
+  }
+  重载() 调用时,会根据弱引用object_ 递增一个只能指针shared_ptr  引用数量+1
+  forward 完美转发传入的可变参数
+  
+  成员变量:
+  std::weak_ptr<CLASS> object_; 弱指针,仅仅判断跟随的智能指针是否被释放,获取shared_ptr指针
+  std::function<void (CLASS*, ARGS...)> function_;
+  函数指针对象,指向函数成员和成员函数的指针
+  
+  
+  template<typename CLASS, typename... ARGS>
+WeakCallback<CLASS, ARGS...> makeWeakCallback(const std::shared_ptr<CLASS>& object,
+                                              void (CLASS::*function)(ARGS...))
+{
+  return WeakCallback<CLASS, ARGS...>(object, function);
+}
+  template<typename CLASS, typename... ARGS>
+WeakCallback<CLASS, ARGS...> makeWeakCallback(const std::shared_ptr<CLASS>& object,
+                                              void (CLASS::*function)(ARGS...) const)
+{
+  return WeakCallback<CLASS, ARGS...>(object, function);
+}
+
+两个函数模板   返回WeakCallback对象
+  
