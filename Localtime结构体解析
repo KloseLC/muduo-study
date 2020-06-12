@@ -1,0 +1,37 @@
+struct Localtime
+{
+  time_t gmtOffset;
+  bool isDst;
+  int arrbIdx;
+
+  Localtime(time_t offset, bool dst, int arrb)
+    : gmtOffset(offset), isDst(dst), arrbIdx(arrb)
+  { }
+};
+
+成员函数:
+  时间对象
+  
+  
+  inline void fillHMS(unsigned seconds, struct tm* utc)
+{
+  utc->tm_sec = seconds % 60;
+  unsigned minutes = seconds / 60;
+  utc->tm_min = minutes % 60;
+  utc->tm_hour = minutes / 60;
+}
+
+}  // namespace detail
+const int kSecondsPerDay = 24*60*60;
+}  // namespace muduo
+
+using namespace muduo;
+using namespace std;
+
+struct TimeZone::Data
+{
+  vector<detail::Transition> transitions;
+  vector<detail::Localtime> localtimes;
+  vector<string> names;
+  string abbreviation;
+};
