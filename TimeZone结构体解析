@@ -1,0 +1,8 @@
+struct TimeZone::Data
+{
+  vector<detail::Transition> transitions;
+  vector<detail::Localtime> localtimes;
+  vector<string> names;
+  string abbreviation;
+};
+
