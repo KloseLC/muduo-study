@@ -1,0 +1,9 @@
+Transition
+  时间类
+成员函数:
+    Transition(time_t t, time_t l, int localIdx)
+    : gmttime(t), localtime(l), localtimeIdx(localIdx)
+  { }
+  初始化
+  
+  
