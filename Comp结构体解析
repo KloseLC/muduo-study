@@ -1,0 +1,22 @@
+  Comp
+  成员函数:
+  bool operator()(const Transition& lhs, const Transition& rhs) const
+  {
+    if (compareGmt)
+      return lhs.gmttime < rhs.gmttime;
+    else
+      return lhs.localtime < rhs.localtime;
+  }
+  重载了(),可以传入时间进行比较
+  
+  
+    bool equal(const Transition& lhs, const Transition& rhs) const
+  {
+    if (compareGmt)
+      return lhs.gmttime == rhs.gmttime;
+    else
+      return lhs.localtime == rhs.localtime;
+  }
+  判断是否相等
+  
+  
