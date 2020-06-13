@@ -1,0 +1,12 @@
+pthread_cond_t是配合mutex 互斥量一起使用的 多线程同步的工具
+
+它拥有一个wait和signal和wait接口在不同的线程中实现开关同步
+
+
+还有另外一个接口函数pthread_cond_broadcast
+
+
+
+pthread_cond_broadcast(&cond1)的作用是唤醒所有正在pthread_cond_wait(&cond1,&mutex1)的线程。
+
+pthread_cond_signal(&cond1)的的作用是唤醒所有正在pthread_cond_wait(&cond1,&mutex1)的至少一个线程。（虽然我还没碰到过多于一个线程的情况，但是man帮组手册上说的是至少一个）
