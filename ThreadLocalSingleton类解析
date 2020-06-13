@@ -1,0 +1,67 @@
+`ThreadLocalSingleton
+  线程局部单例
+  
+  成员函数:
+      static T& instance()
+  {
+    if (!t_value_)
+    {
+      t_value_ = new T();
+      deleter_.set(t_value_);
+    }
+    return *t_value_;
+  }
+  实例返回函数
+  
+    static T* pointer()
+  {
+    return t_value_;
+  }
+  返回指针
+  
+    static void destructor(void* obj)
+  {
+    assert(obj == t_value_);
+    typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];
+    T_must_be_complete_type dummy; (void) dummy;
+    delete t_value_;
+    t_value_ = 0;
+  }
+  销毁当前单例的函数
+  没看明白typedef char这行代码的含义,仅仅是为了判断类型推导是否有意义吗?
+  
+  
+  
+      Deleter()
+    {
+      pthread_key_create(&pkey_, &ThreadLocalSingleton::destructor);
+    }
+    创建一个线程的私有变量,并设置析构函数
+    
+        ~Deleter()
+    {
+      pthread_key_delete(pkey_);
+    }
+    删除线程私有变量的对象
+    
+    
+        void set(T* newObj)
+    {
+      assert(pthread_getspecific(pkey_) == NULL);
+      pthread_setspecific(pkey_, newObj);
+    }
+    设置私有变量的值
+    
+    
+        pthread_key_t pkey_;
+     线程变量的key
+     
+     
+     成员变量:
+        static __thread T* t_value_;
+        static Deleter deleter_;
+        
+        
+     
+  
+  
