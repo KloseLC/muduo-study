@@ -1,0 +1,45 @@
+ThreadLocal
+  线程私有变量模板类
+  
+  成员函数:
+      ThreadLocal()
+  {
+    MCHECK(pthread_key_create(&pkey_, &ThreadLocal::destructor));
+  }
+  创建私有key并注册销毁函数
+  
+  
+  
+  ~ThreadLocal()
+  {
+    MCHECK(pthread_key_delete(pkey_));
+  }
+  删除key的线程私有变量
+  
+  
+    T& value()
+  {
+    T* perThreadValue = static_cast<T*>(pthread_getspecific(pkey_));
+    if (!perThreadValue)
+    {
+      T* newObj = new T();
+      MCHECK(pthread_setspecific(pkey_, newObj));
+      perThreadValue = newObj;
+    }
+    return *perThreadValue;
+  }
+  返回具体的\线程变量 若果存在则返回 如果不存在则new一个返回
+  specific 明确的值
+  
+    static void destructor(void *x)
+  {
+    T* obj = static_cast<T*>(x);
+    typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];
+    T_must_be_complete_type dummy; (void) dummy;
+    delete obj;
+  }
+  销毁掉目标x值
+  
+  
+  
+  
