@@ -16,11 +16,176 @@ uid_t ProcessInfo::uid()
 {
   return ::getuid();
 }
+获取进程id
+
+string ProcessInfo::username()
+{
+  struct passwd pwd;
+  struct passwd* result = NULL;
+  char buf[8192];
+  const char* name = "unknownuser";
+
+  getpwuid_r(uid(), &pwd, buf, sizeof buf, &result);
+  if (result)
+  {
+    name = pwd.pw_name;
+  }
+  return name;
+}
+获取进程执行的用户名称
+
+uid_t ProcessInfo::euid()
+{
+  return ::geteuid();
+}
+
+获取该线程的上一个父线程
+
+Timestamp ProcessInfo::startTime()
+{
+  return g_startTime;
+}
+获取开始的时间戳
+
+int ProcessInfo::clockTicksPerSecond()
+{
+  return g_clockTicks;
+}
+获取秒级的时间
+
+int ProcessInfo::pageSize()
+{
+  return g_pageSize;
+}
+获取page的size
+
+bool ProcessInfo::isDebugBuild()
+{
+#ifdef NDEBUG
+  return false;
+#else
+  return true;
+#endif
+}
+查看bin是否是debug版本
+
+string ProcessInfo::hostname()
+{
+  // HOST_NAME_MAX 64
+  // _POSIX_HOST_NAME_MAX 255
+  char buf[256];
+  if (::gethostname(buf, sizeof buf) == 0)
+  {
+    buf[sizeof(buf)-1] = '\0';
+    return buf;
+  }
+  else
+  {
+    return "unknownhost";
+  }
+}
+
+获取进程用户名名称
+
+string ProcessInfo::procname()
+{
+  return procname(procStat()).as_string();
+}
+获取进程名称
 
 
-  string username();
-  uid_t euid();
-  Timestamp startTime();
-  int clockTicksPerSecond();
-  int pageSize();
-  bool isDebugBuild();  // constexpr
+string ProcessInfo::procStatus()
+{
+  string result;
+  FileUtil::readFile("/proc/self/status", 65536, &result);
+  return result;
+}
+
+获取进程的状态
+
+
+string ProcessInfo::threadStat()
+{
+  char buf[64];
+  snprintf(buf, sizeof buf, "/proc/self/task/%d/stat", CurrentThread::tid());
+  string result;
+  FileUtil::readFile(buf, 65536, &result);
+  return result;
+}
+
+获取线程的状态
+
+string ProcessInfo::exePath()
+{
+  string result;
+  char buf[1024];
+  ssize_t n = ::readlink("/proc/self/exe", buf, sizeof buf);
+  if (n > 0)
+  {
+    result.assign(buf, n);
+  }
+  return result;
+}
+
+获取执行文件路径
+
+
+int ProcessInfo::openedFiles()
+{
+  t_numOpenedFiles = 0;
+  scanDir("/proc/self/fd", fdDirFilter);  封装了scandir
+  return t_numOpenedFiles;
+}
+返回打开dir里面的文件数组数量,如果发生错误返回-1
+
+int ProcessInfo::maxOpenFiles()
+{
+  struct rlimit rl;
+  if (::getrlimit(RLIMIT_NOFILE, &rl))
+  {
+    return openedFiles();
+  }
+  else
+  {
+    return static_cast<int>(rl.rlim_cur);
+  }
+}
+打开最大的fd 
+
+ProcessInfo::CpuTime ProcessInfo::cpuTime()
+{
+  ProcessInfo::CpuTime t;
+  struct tms tms;
+  if (::times(&tms) >= 0)
+  {
+    const double hz = static_cast<double>(clockTicksPerSecond());
+    t.userSeconds = static_cast<double>(tms.tms_utime) / hz;
+    t.systemSeconds = static_cast<double>(tms.tms_stime) / hz;
+  }
+  return t;
+}
+获取cpu时间
+
+int ProcessInfo::numThreads()
+{
+  int result = 0;
+  string status = procStatus();
+  size_t pos = status.find("Threads:");
+  if (pos != string::npos)
+  {
+    result = ::atoi(status.c_str() + pos + 8);
+  }
+  return result;
+}
+获取线程数量
+
+std::vector<pid_t> ProcessInfo::threads()
+{
+  std::vector<pid_t> result;
+  t_pids = &result;
+  scanDir("/proc/self/task", taskDirFilter);
+  t_pids = NULL;
+  std::sort(result.begin(), result.end());
+  return result;
+}
+获取进程的容器
