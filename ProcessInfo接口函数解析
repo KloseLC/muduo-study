@@ -1,0 +1,26 @@
+pid_t ProcessInfo::pid()
+{
+  return ::getpid();
+}
+获取进程id
+
+string ProcessInfo::pidString()
+{
+  char buf[32];
+  snprintf(buf, sizeof buf, "%d", pid());
+  return buf;
+}
+将id打印出字符串
+
+uid_t ProcessInfo::uid()
+{
+  return ::getuid();
+}
+
+
+  string username();
+  uid_t euid();
+  Timestamp startTime();
+  int clockTicksPerSecond();
+  int pageSize();
+  bool isDebugBuild();  // constexpr
