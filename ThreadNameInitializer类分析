@@ -1,0 +1,17 @@
+ThreadNameInitializer
+  线程名称注册
+  
+  ThreadNameInitializer()
+  {
+    muduo::CurrentThread::t_threadName = "main";
+    CurrentThread::tid();
+    pthread_atfork(NULL, NULL, &afterFork);
+  }
+  
+  pthread_atfork是为了fork()的子进程在主进程出现了上锁的情况下,清空主和子进程的上锁状态的一个接口
+  
+  避免子进程因为继承的已上锁的锁,再次上锁出现死锁
+  
+  
+  
+  
