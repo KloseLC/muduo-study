@@ -1,0 +1,51 @@
+ThreadData
+  线程数据描述
+  成员函数:
+       void runInThread()
+  {
+    *tid_ = muduo::CurrentThread::tid();
+    tid_ = NULL;
+    latch_->countDown();  通知所有条件锁放开
+    latch_ = NULL;
+
+    muduo::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
+    ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
+    try
+    {
+      func_();
+      muduo::CurrentThread::t_threadName = "finished";
+    }
+    catch (const Exception& ex)
+    {
+      muduo::CurrentThread::t_threadName = "crashed";
+      fprintf(stderr, "exception caught in Thread %s\n", name_.c_str());
+      fprintf(stderr, "reason: %s\n", ex.what());
+      fprintf(stderr, "stack trace: %s\n", ex.stackTrace());
+      abort();
+    }
+    catch (const std::exception& ex)
+    {
+      muduo::CurrentThread::t_threadName = "crashed";
+      fprintf(stderr, "exception caught in Thread %s\n", name_.c_str());
+      fprintf(stderr, "reason: %s\n", ex.what());
+      abort();
+    }
+    catch (...)
+    {
+      muduo::CurrentThread::t_threadName = "crashed";
+      fprintf(stderr, "unknown exception caught in Thread %s\n", name_.c_str());
+      throw; // rethrow
+    }
+    为线程命名 使用prctl函数
+    
+    
+
+
+
+
+成员对象:
+   typedef muduo::Thread::ThreadFunc ThreadFunc;
+   ThreadFunc func_;
+   string name_;
+   pid_t* tid_;
+   CountDownLatch* latch_;
