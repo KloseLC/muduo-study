@@ -1,0 +1,170 @@
+Mutex
+  锁文件
+  
+  
+#define CAPABILITY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__(capability(x))
+
+#define SCOPED_CAPABILITY \
+  THREAD_ANNOTATION_ATTRIBUTE__(scoped_lockable)
+
+#define   GUARDED_BY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
+
+#define PT_GUARDED_BY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
+
+#define ACQUIRED_BEFORE(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
+
+#define ACQUIRED_AFTER(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
+
+#define REQUIRES(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(requires_capability(__VA_ARGS__))
+
+#define REQUIRES_SHARED(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(requires_shared_capability(__VA_ARGS__))
+
+#define ACQUIRE(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
+
+#define ACQUIRE_SHARED(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(acquire_shared_capability(__VA_ARGS__))
+
+#define RELEASE(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
+
+#define RELEASE_SHARED(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(release_shared_capability(__VA_ARGS__))
+
+#define TRY_ACQUIRE(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_capability(__VA_ARGS__))
+
+#define TRY_ACQUIRE_SHARED(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_shared_capability(__VA_ARGS__))
+
+#define EXCLUDES(...) \
+  THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
+
+#define ASSERT_CAPABILITY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__(assert_capability(x))
+
+#define ASSERT_SHARED_CAPABILITY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_capability(x))
+
+#define RETURN_CAPABILITY(x) \
+  THREAD_ANNOTATION_ATTRIBUTE__( (x))
+
+#define NO_THREAD_SAFETY_ANALYSIS \
+  THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
+  
+以上都是编译期优化的操作宏定义
+  
+  
+  class CAPABILITY("mutex") MutexLock : noncopyable
+{
+ public:
+   MutexLock(): holder_(0)
+  {
+    MCHECK(pthread_mutex_init(&mutex_, NULL));
+  }
+  构造和初始化互斥量
+  
+  ~MutexLock()
+  {
+    assert(holder_ == 0);
+    MCHECK(pthread_mutex_destroy(&mutex_));
+    析构互斥量
+  }
+
+  // must be called when locked, i.e. for assertion
+  bool isLockedByThisThread() const
+  {
+    return holder_ == CurrentThread::tid();
+    查看锁的线程出处?  还是判断是否已经上锁
+  }
+
+  void assertLocked() const ASSERT_CAPABILITY(this)
+  {
+    assert(isLockedByThisThread()); 断言是否上锁
+  }
+
+  // internal usage
+
+  void lock() ACQUIRE()
+  {
+    MCHECK(pthread_mutex_lock(&mutex_));
+    assignHolder();
+  }
+  上锁
+  
+  void unlock() RELEASE()
+  {
+    unassignHolder();
+    MCHECK(pthread_mutex_unlock(&mutex_));
+  }
+  解锁
+
+  pthread_mutex_t* getPthreadMutex() /* non-const */
+  {
+    return &mutex_;
+  }
+  获得互斥量的指针
+  
+ private:
+  friend class Condition;
+  友类
+  
+  class UnassignGuard : noncopyable
+  {
+   public:
+    explicit UnassignGuard(MutexLock& owner)
+      : owner_(owner)
+    {
+      owner_.unassignHolder();
+    }将owner_ 设置为0
+
+    ~UnassignGuard()
+    {
+      owner_.assignHolder();
+    }将owner_设置为线程号
+
+   private:
+    MutexLock& owner_;
+  };
+
+  void unassignHolder()
+  {
+    holder_ = 0;
+  }
+
+  void assignHolder()
+  {
+    holder_ = CurrentThread::tid();
+  }
+
+  pthread_mutex_t mutex_;
+  pid_t holder_;
+};
+
+class SCOPED_CAPABILITY MutexLockGuard : noncopyable
+{
+ public:
+  explicit MutexLockGuard(MutexLock& mutex) ACQUIRE(mutex)
+    : mutex_(mutex)
+  {
+    mutex_.lock();
+  }
+
+  ~MutexLockGuard() RELEASE()
+  {
+    mutex_.unlock();
+  }
+
+ private:
+
+  MutexLock& mutex_;
+};
+
+这个锁类的实现和MutexLock  有什么区别目前尚不知道
