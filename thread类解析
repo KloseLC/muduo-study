@@ -1,0 +1,99 @@
+Thread
+线程的基类
+  成员函数:
+Thread::Thread(ThreadFunc func, const string& n)
+  : started_(false),
+    joined_(false),
+    pthreadId_(0),
+    tid_(0),
+    func_(std::move(func)),
+    name_(n),
+    latch_(1)
+{
+  setDefaultName();
+}
+进行初始化,并设置线程编号
+
+Thread::~Thread()
+{
+  if (started_ && !joined_)
+  {
+    pthread_detach(pthreadId_);
+  }
+}
+
+在判断开启线程后并未做主线程和子线程的合二为一,则立刻分离出主线程
+
+
+void Thread::setDefaultName()
+{
+  int num = numCreated_.incrementAndGet();
+  if (name_.empty())
+  {
+    char buf[32];
+    snprintf(buf, sizeof buf, "Thread%d", num);
+    name_ = buf;
+  }
+}
+
+设置线程编号
+
+
+void Thread::start()
+{
+  assert(!started_);
+  started_ = true;
+  // FIXME: move(func_)
+  detail::ThreadData* data = new detail::ThreadData(func_, name_, &tid_, &latch_);
+  if (pthread_create(&pthreadId_, NULL, &detail::startThread, data))
+  {
+    started_ = false;
+    delete data; // or no delete?
+    LOG_SYSFATAL << "Failed in pthread_create";
+  }
+  else
+  {
+    latch_.wait();
+    assert(tid_ > 0);
+  }
+}
+开始线程 
+
+void* startThread(void* obj)
+{
+  ThreadData* data = static_cast<ThreadData*>(obj);
+  data->runInThread();
+  delete data;
+  return NULL;
+}
+将指针指向的ThreadData执行后删除
+
+
+void CurrentThread::cacheTid()
+{
+  if (t_cachedTid == 0)
+  {
+    t_cachedTid = detail::gettid();
+    t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
+  }
+}
+
+作为未知  t_tidStringLength变量无法找到申明
+
+bool CurrentThread::isMainThread()
+{
+  return tid() == ::getpid();
+}
+
+返回当前进程是否是主进程
+
+
+void CurrentThread::sleepUsec(int64_t usec)
+{
+  struct timespec ts = { 0, 0 };
+  ts.tv_sec = static_cast<time_t>(usec / Timestamp::kMicroSecondsPerSecond);
+  ts.tv_nsec = static_cast<long>(usec % Timestamp::kMicroSecondsPerSecond * 1000);
+  ::nanosleep(&ts, NULL);
+}
+休息指定时间
+
