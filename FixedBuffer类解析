@@ -1,0 +1,62 @@
+FixedBuffer
+日志流  
+是一个模板的类
+
+  FixedBuffer()
+    : cur_(data_)
+  {
+    setCookie(cookieStart);
+  }
+  初始化,setCookie还是一个赋值
+  
+    ~FixedBuffer()
+  {
+    setCookie(cookieEnd);
+  }
+  赋值一个结束值
+  
+ void append(const char* /*restrict*/ buf, size_t len)
+  {
+    // FIXME: append partially
+    if (implicit_cast<size_t>(avail()) > len)
+    {
+      memcpy(cur_, buf, len);
+      cur_ += len;
+    }
+  }
+  追加内存copy
+  
+  
+  const char* data() const { return data_; }
+  int length() const { return static_cast<int>(cur_ - data_); }
+
+  // write to data_ directly
+  char* current() { return cur_; }
+  int avail() const { return static_cast<int>(end() - cur_); }
+  void add(size_t len) { cur_ += len; }
+  
+  void reset() { cur_ = data_; }
+  void bzero() { memZero(data_, sizeof data_); }
+
+  // for used by GDB
+  const char* debugString();
+  void setCookie(void (*cookie)()) { cookie_ = cookie; }
+  // for used by unit test
+  string toString() const { return string(data_, length()); }
+  StringPiece toStringPiece() const { return StringPiece(data_, length()); }
+  const char* end() const { return data_ + sizeof data_; }
+  以上返回
+  
+    static void cookieStart();
+  static void cookieEnd();
+  
+  成员变量:
+  char data_[SIZE];
+  char* cur_;
+  
+  
+  
+  
+  
+  
+  
