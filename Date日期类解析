@@ -1,0 +1,102 @@
+Date
+  日期计算
+
+  struct YearMonthDay
+  {
+    int year; // [1900..2500]
+    int month;  // [1..12]
+    int day;  // [1..31]
+  };
+  
+  
+    static const int kDaysPerWeek = 7;
+  static const int kJulianDayOf1970_01_01;
+  
+  
+  
+Date::Date(int y, int m, int d)
+  : julianDayNumber_(getJulianDayNumber(y, m, d))
+{
+}
+
+Date::Date(const struct tm& t)
+  : julianDayNumber_(getJulianDayNumber(
+        t.tm_year+1900,
+        t.tm_mon+1,
+        t.tm_mday))
+{
+}
+
+  void swap(Date& that)
+  {
+    std::swap(julianDayNumber_, that.julianDayNumber_);
+  }
+  交换 
+  
+  
+  
+   bool valid() const { return julianDayNumber_ > 0; }
+   判断儒略日是否有效
+   
+   string Date::toIsoString() const
+{
+  char buf[32];
+  YearMonthDay ymd(yearMonthDay());
+  snprintf(buf, sizeof buf, "%4d-%02d-%02d", ymd.year, ymd.month, ymd.day);
+  return buf;
+}
+格式化字符串 年月日 
+
+Date::YearMonthDay Date::yearMonthDay() const
+{
+  return getYearMonthDay(julianDayNumber_);
+}
+把当前儒略日转化成年月日
+
+ int year() const
+  {
+    return yearMonthDay().year;
+  }
+
+  int month() const
+  {
+    return yearMonthDay().month;
+  }
+
+  int day() const
+  {
+    return yearMonthDay().day;
+  }
+  
+  分别获取年月日 
+  
+    int weekDay() const
+  {
+    return (julianDayNumber_+1) % kDaysPerWeek;
+  }
+  获取周几的天数
+  
+    int julianDayNumber() const { return julianDayNumber_; }
+    返回儒略日
+    inline bool operator<(Date x, Date y)
+{
+  return x.julianDayNumber() < y.julianDayNumber();
+}
+
+比较儒略日
+
+inline bool operator==(Date x, Date y)
+{
+  return x.julianDayNumber() == y.julianDayNumber();
+}
+比较儒略日
+
+    
+    
+ 成员变量:
+   int julianDayNumber_;
+   
+   成员为儒略日
+  
+
+   
