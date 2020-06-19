@@ -1,0 +1,130 @@
+ReadSmallFile
+
+FileUtil::ReadSmallFile::ReadSmallFile(StringArg filename)
+  : fd_(::open(filename.c_str(), O_RDONLY | O_CLOEXEC)),
+    err_(0)
+{
+  buf_[0] = '\0';
+  if (fd_ < 0)
+  {
+    err_ = errno;
+  }
+}
+打开文件初始化
+
+
+FileUtil::ReadSmallFile::~ReadSmallFile()
+{
+  if (fd_ >= 0)
+  {
+    ::close(fd_); // FIXME: check EINTR
+  }
+}
+关闭正常文件
+
+int FileUtil::ReadSmallFile::readToString(int maxSize,
+                                          String* content,
+                                          int64_t* fileSize,
+                                          int64_t* modifyTime,
+                                          int64_t* createTime)
+{
+  static_assert(sizeof(off_t) == 8, "_FILE_OFFSET_BITS = 64");  判断off_t所在的单位是否标准 校对系统
+  assert(content != NULL);
+  int err = err_;
+  if (fd_ >= 0)
+  {
+    content->clear();   参数置空
+
+    if (fileSize)
+    {
+      struct stat statbuf;  申明文件对象  
+      if (::fstat(fd_, &statbuf) == 0)   打开为你教案
+      {
+        if (S_ISREG(statbuf.st_mode))  
+        stat用来判断没有打开的文件,而fstat用来判断打开的文件.我们使用最多的属性是st_mode.通过着属性我们可以判断给定的文件是一个普通文件还是一个目录,连接等等.可以使用下面几个宏来判断.
+S_ISLNK(st_mode):是否是一个连接.
+
+S_ISREG是否是一个常规文件.
+
+S_ISDIR是否是一个目录
+
+S_ISCHR是否是一个字符设备.
+
+S_ISBLK是否是一个块设备
+
+S_ISFIFO是否是一个FIFO文件.
+
+S_ISSOCK是否是一个SOCKET文件. 
+        {
+          *fileSize = statbuf.st_size;
+          content->reserve(static_cast<int>(std::min(implicit_cast<int64_t>(maxSize), *fileSize)));
+        }
+        else if (S_ISDIR(statbuf.st_mode))
+        {
+          err = EISDIR;
+        }
+        if (modifyTime)
+        {
+          *modifyTime = statbuf.st_mtime;
+        }
+        if (createTime)
+        {
+          *createTime = statbuf.st_ctime;
+        }
+      }
+      else
+      {
+        err = errno;
+      }
+    }
+
+    while (content->size() < implicit_cast<size_t>(maxSize))
+    {
+      size_t toRead = std::min(implicit_cast<size_t>(maxSize) - content->size(), sizeof(buf_));
+      ssize_t n = ::read(fd_, buf_, toRead);
+      if (n > 0)
+      {
+        content->append(buf_, n);
+      }
+      else
+      {
+        if (n < 0)
+        {
+          err = errno;
+        }
+        break;
+      }
+    }
+  }
+  return err;
+}
+
+int FileUtil::ReadSmallFile::readToBuffer(int* size)
+{
+  int err = err_;
+  if (fd_ >= 0)
+  {
+    ssize_t n = ::pread(fd_, buf_, sizeof(buf_)-1, 0);
+    if (n >= 0)
+    {
+      if (size)
+      {
+        *size = static_cast<int>(n);
+      }
+      buf_[n] = '\0';
+    }
+    else
+    {
+      err = errno;
+    }
+  }
+  return err;
+}
+
+pread()、pwrite()函数与read()、write()函数的区别在于是否更新当前文件偏移量；
+
+pread：相当于调用lseek后再调用read函数；
+
+调用pread时，无法中断其定位和读操作，且不更新当前文件偏移量。pwrite()函数与此相同。
+
+
