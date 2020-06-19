@@ -1,0 +1,108 @@
+LogStream
+  日志流的类
+  
+  self& operator<<(bool v)
+  {
+    buffer_.append(v ? "1" : "0", 1);
+    return *this;
+  }
+  根据传进来的值判定知否追加1个字节
+
+  self& operator<<(short);
+  self& operator<<(unsigned short);
+  self& operator<<(int);
+  self& operator<<(unsigned int);
+  self& operator<<(long);
+  self& operator<<(unsigned long);
+  self& operator<<(long long);
+  self& operator<<(unsigned long long);
+
+  self& operator<<(const void*);
+
+  self& operator<<(float v)  {
+    *this << static_cast<double>(v);
+    return *this;
+  }
+  
+    self& operator<<(const char* str)
+  {
+    if (str)
+    {
+      buffer_.append(str, strlen(str));
+    }
+    else
+    {
+      buffer_.append("(null)", 6);
+    }
+    return *this;
+  }
+
+  self& operator<<(const unsigned char* str)
+  {
+    return operator<<(reinterpret_cast<const char*>(str));
+  }
+
+  self& operator<<(const string& v)
+  {
+    buffer_.append(v.c_str(), v.size());
+    return *this;
+  }
+
+  self& operator<<(const StringPiece& v)
+  {
+    buffer_.append(v.data(), v.size());
+    return *this;
+  }
+
+  self& operator<<(const Buffer& v)
+  {
+    *this << v.toStringPiece();
+    return *this;
+  }
+  
+  以上应该是<<符号的重载
+  
+  void append(const char* data, int len) { buffer_.append(data, len); }
+  追加写入buff
+ 
+  const Buffer& buffer() const { return buffer_; }
+  
+  void resetBuffer() { buffer_.reset(); }
+  重置buffer
+  
+    void staticCheck()
+    {
+  static_assert(kMaxNumericSize - 10 > std::numeric_limits<double>::digits10,
+                "kMaxNumericSize is large enough");
+  static_assert(kMaxNumericSize - 10 > std::numeric_limits<long double>::digits10,
+                "kMaxNumericSize is large enough");
+  static_assert(kMaxNumericSize - 10 > std::numeric_limits<long>::digits10,
+                "kMaxNumericSize is large enough");
+  static_assert(kMaxNumericSize - 10 > std::numeric_limits<long long>::digits10,
+                "kMaxNumericSize is large enough");
+}
+    对max长度的断言,查看是否符合预期 大于各类型的极大值
+    
+    template<typename T>
+    void LogStream::formatInteger(T v)
+{
+  if (buffer_.avail() >= kMaxNumericSize)
+  {
+    size_t len = convert(buffer_.current(), v);
+    buffer_.add(len);
+  }
+}格式化int类型  
+
+成员变量:
+  Buffer buffer_;
+    static const int kMaxNumericSize = 32;
+  
+  
+
+
+
+  
+  
+  
+  
+  
