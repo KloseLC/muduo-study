@@ -1,0 +1,150 @@
+  enum LogLevel
+  {
+    TRACE,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
+    FATAL,
+    NUM_LOG_LEVELS,
+  };
+  
+  日志等级
+  
+    class SourceFile
+  {
+   public:
+    template<int N>
+    SourceFile(const char (&arr)[N])
+      : data_(arr),
+        size_(N-1)
+    {
+      const char* slash = strrchr(data_, '/'); // builtin function  查找自右侧开始的第一个'/'字符位置并返回之后的字符串
+      if (slash)
+      {
+        data_ = slash + 1;
+        size_ -= static_cast<int>(data_ - arr);
+      }
+    }
+    字符串处理构造函数  如果'/'存在则
+
+    explicit SourceFile(const char* filename)
+      : data_(filename)
+    {
+      const char* slash = strrchr(filename, '/');
+      if (slash)
+      {
+        data_ = slash + 1;
+      }
+      size_ = static_cast<int>(strlen(data_));
+    }文件名称的处理只取/后面的
+
+    const char* data_;
+    int size_;
+  };
+  
+  Logger::Logger(SourceFile file, int line)
+  : impl_(INFO, 0, file, line)
+{
+}
+
+Logger::Logger(SourceFile file, int line, LogLevel level, const char* func)
+  : impl_(level, 0, file, line)
+{
+  impl_.stream_ << func << ' ';
+}
+
+Logger::Logger(SourceFile file, int line, LogLevel level)
+  : impl_(level, 0, file, line)
+{
+}
+
+Logger::Logger(SourceFile file, int line, bool toAbort)
+  : impl_(toAbort?FATAL:ERROR, errno, file, line)
+{
+}
+构造函数初始化
+
+
+class Impl
+{
+ public:
+  typedef Logger::LogLevel LogLevel;
+  Impl(LogLevel level, int old_errno, const SourceFile& file, int line);
+  void formatTime();
+  void finish();
+
+  Timestamp time_;
+  LogStream stream_;
+  LogLevel level_;
+  int line_;
+  SourceFile basename_;
+};
+
+
+void Logger::Impl::formatTime()
+{
+  int64_t microSecondsSinceEpoch = time_.microSecondsSinceEpoch();
+  time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicroSecondsPerSecond);
+  int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicroSecondsPerSecond);
+  if (seconds != t_lastSecond)
+  {
+    t_lastSecond = seconds;
+    struct tm tm_time;
+    if (g_logTimeZone.valid())
+    {
+      tm_time = g_logTimeZone.toLocalTime(seconds);
+    }
+    else
+    {
+      ::gmtime_r(&seconds, &tm_time); // FIXME TimeZone::fromUtcTime
+    }
+
+    int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
+        tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
+        tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
+    assert(len == 17); (void)len;
+  }
+
+  if (g_logTimeZone.valid())
+  {
+    Fmt us(".%06d ", microseconds);
+    assert(us.length() == 8);
+    stream_ << T(t_time, 17) << T(us.data(), 8);
+  }
+  else
+  {
+    Fmt us(".%06dZ ", microseconds);
+    assert(us.length() == 9);
+    stream_ << T(t_time, 17) << T(us.data(), 9);
+  }
+}
+
+
+void Logger::Impl::finish()
+{
+  stream_ << " - " << basename_ << ':' << line_ << '\n';
+}
+输出数据信息
+
+template <typename T>
+T* CheckNotNull(Logger::SourceFile file, int line, const char *names, T* ptr)
+{
+  if (ptr == NULL)
+  {
+   Logger(file, line, Logger::FATAL).stream() << names;
+  }
+  return ptr;
+}
+
+const char* strerror_tl(int savedErrno)
+{
+  return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
+}
+strerror()用来依参数errnum 的错误代码来查询其错误原因的描述字符串, 然后将该字符串指针返回.
+
+  
+  
+  
+  
+  
