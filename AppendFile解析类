@@ -1,0 +1,60 @@
+AppendFile
+  追加文件操作类
+FileUtil::AppendFile::AppendFile(StringArg filename)
+  : fp_(::fopen(filename.c_str(), "ae")),  // 'e' for O_CLOEXEC
+    writtenBytes_(0)
+{
+  assert(fp_);
+  ::setbuffer(fp_, buffer_, sizeof buffer_);在打开文件流后, 读取内容之前, 调用setbuffer()可用来设置文件流的缓冲区. 
+  参数stream 为指定的文件流, 参数buf 指向自定的缓冲区起始地址, 参数size 为缓冲区大小.
+  // posix_fadvise POSIX_FADV_DONTNEED ?
+}
+
+void FileUtil::AppendFile::append(const char* logline, const size_t len)
+{
+  size_t n = write(logline, len);  写入文件
+  size_t remain = len - n;
+  while (remain > 0)
+  {
+    size_t x = write(logline + n, remain);
+    if (x == 0)
+    {
+      int err = ferror(fp_);
+      if (err)
+      {
+        fprintf(stderr, "AppendFile::append() failed %s\n", strerror_tl(err));
+      }
+      break;
+    }
+    n += x;
+    remain = len - n; // remain -= x
+  }
+
+  writtenBytes_ += len;
+}
+
+off_t writtenBytes() const { return writtenBytes_; }
+off_t类型用于指示文件的偏移量，常就是long类型，其默认为一个32位的整数，在gcc编译中会被编译为long int类型，在64位
+的Linux系统中则会被编译为long long int，这是一个64位的整数，其定义在unistd.h头文件中可以查看。
+
+void FileUtil::AppendFile::flush()
+{
+  ::fflush(fp_);
+}冲洗缓存区
+
+size_t FileUtil::AppendFile::write(const char* logline, size_t len)
+{
+  // #undef fwrite_unlocked
+  return ::fwrite_unlocked(logline, 1, len, fp_);
+}
+fwrite_unlocked 
+fwrite 和 fwrite_unlocked是一对，其中fwrite_unlocked是fwrite的线程不安全版本，因为不加锁。
+这些函数中每一个都与它没有 `_unlocked` 后缀的对应版本行为一致，但是它们不使用锁定 (它们不自行设置锁定，
+也不判断是否有其他函数设置的锁定) ，因此是非线程安全的。参见 flockfile(3) 
+
+函数成员:
+  FILE* fp_;
+  char buffer_[64*1024];
+  off_t writtenBytes_;
+
+
