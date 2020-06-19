@@ -1,0 +1,22 @@
+Exception
+  异常处理类
+  
+Exception::Exception(string msg)
+  : message_(std::move(msg)),
+    stack_(CurrentThread::stackTrace(/*demangle=*/false))
+{
+}
+
+  const char* what() const noexcept override
+  {
+    return message_.c_str();
+  }
+
+  const char* stackTrace() const noexcept
+  {
+    return stack_.c_str();
+  }
+
+ private:
+  string message_;
+  string stack_;
