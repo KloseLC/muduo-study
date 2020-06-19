@@ -1,0 +1,46 @@
+CountDownLatch
+  
+CountDownLatch::CountDownLatch(int count)
+  : mutex_(),
+    condition_(mutex_),
+    count_(count)
+{
+}
+
+void CountDownLatch::wait()
+{
+  MutexLockGuard lock(mutex_);
+  while (count_ > 0)
+  {
+    condition_.wait();
+  }
+}
+条件变量阻塞等待
+
+
+
+void CountDownLatch::countDown()
+{
+  MutexLockGuard lock(mutex_);
+  --count_;
+  if (count_ == 0)
+  {
+    condition_.notifyAll();
+  }
+}
+模拟信号量广播的一个条件变量实现
+
+
+int CountDownLatch::getCount() const
+{
+  MutexLockGuard lock(mutex_);
+  return count_;
+}
+
+返回当前的计数数量
+
+
+
+
+
+
