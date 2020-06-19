@@ -1,0 +1,93 @@
+BoundedBlockingQueue
+  有限阻塞队列类实现
+  
+  explicit BoundedBlockingQueue(int maxSize)
+    : mutex_(),
+      notEmpty_(mutex_),
+      notFull_(mutex_),
+      queue_(maxSize)
+  {
+  }
+  初始化
+  
+    void put(const T& x)
+  {
+    MutexLockGuard lock(mutex_);
+    while (queue_.full())
+    {
+      notFull_.wait();
+    }
+    assert(!queue_.full());
+    queue_.push_back(x);
+    notEmpty_.notify();
+  }
+  如果满了就等待
+  在队列塞入前先判定是否满,塞入一个队列后,释放一次
+  
+    void put(T&& x)
+  {
+    MutexLockGuard lock(mutex_);
+    while (queue_.full())
+    {
+      notFull_.wait();
+    }
+    assert(!queue_.full());
+    queue_.push_back(std::move(x));
+    notEmpty_.notify();
+  }
+  
+  分为左值引用和右值引用
+  
+    T take()
+  {
+    MutexLockGuard lock(mutex_);
+    while (queue_.empty())
+    {
+      notEmpty_.wait();
+    }
+    assert(!queue_.empty());
+    T front(std::move(queue_.front()));
+    queue_.pop_front();
+    notFull_.notify();
+    return front;
+  }
+  弹出一个并执行一个,返回弹出的元素
+  
+  
+  bool empty() const
+  {
+    MutexLockGuard lock(mutex_);
+    return queue_.empty();
+  }
+查看当前队列是否空
+  
+  bool full() const
+  {
+    MutexLockGuard lock(mutex_);
+    return queue_.full();
+  }
+  队列是否满
+  
+    size_t capacity() const
+  {
+    MutexLockGuard lock(mutex_);
+    return queue_.capacity();
+  }
+  返回队列的容量
+  
+  成员变量:
+  
+    mutable MutexLock          mutex_;
+  Condition                  notEmpty_ GUARDED_BY(mutex_);
+  Condition                  notFull_ GUARDED_BY(mutex_);
+  boost::circular_buffer<T>  queue_ GUARDED_BY(mutex_);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
