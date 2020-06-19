@@ -1,0 +1,113 @@
+AtomicIntegerT
+  原子int型模板
+  
+     AtomicIntegerT()
+    : value_(0)
+  {
+  }
+  
+  T get()
+  {
+    // in gcc >= 4.7: __atomic_load_n(&value_, __ATOMIC_SEQ_CST)
+    return __sync_val_compare_and_swap(&value_, 0, 0);  无锁锁编程
+  }
+  在修改某个值之前,会先比较写入的值和传入的值是否一直,如果一致修改成功 再交出锁
+  (在写入新值之前， 读出旧值， 当且仅当旧值与存储中的当前值一致时，才把新值写入存储)
+  CAS无锁编程  是基于gcc提供的原子接口,gcc的接口无调度无消耗,是cpu物理层的接口 
+  
+  
+  T getAndAdd(T x)
+  {
+    // in gcc >= 4.7: __atomic_fetch_add(&value_, x, __ATOMIC_SEQ_CST)
+    return __sync_fetch_and_add(&value_, x);
+  }
+  
+  无锁一个数
+  
+    T addAndGet(T x)
+  {
+    return getAndAdd(x) + x;
+  }
+  返回加两次 
+  
+ T incrementAndGet()
+  {
+    return addAndGet(1);
+  }
+  
+  自加1
+  
+  
+    T decrementAndGet()
+  {
+    return addAndGet(-1);
+  }
+  
+  自减1
+  
+    void add(T x)
+  {
+    getAndAdd(x);
+  }
+
+加指定的数量
+
+  void decrement()
+  {
+    decrementAndGet();
+  }
+  加1
+  
+  
+  T getAndSet(T newValue)
+  {
+    // in gcc >= 4.7: __atomic_exchange_n(&value, newValue, __ATOMIC_SEQ_CST)
+    return __sync_lock_test_and_set(&value_, newValue);
+  }
+  
+  type __sync_lock_test_and_set (type *ptr, type value, ...)
+   将*ptr设为value并返回*ptr操作之前的值。
+
+  void __sync_lock_release (type *ptr, ...)
+     将*ptr置0
+  
+  成员变量:
+    volatile T value_;
+  
+  
+  
+无所编程系列接口  
+  
+type __sync_fetch_and_add (type *ptr, type value, ...)
+type __sync_fetch_and_sub (type *ptr, type value, ...)
+type __sync_fetch_and_or (type *ptr, type value, ...)
+type __sync_fetch_and_and (type *ptr, type value, ...)
+type __sync_fetch_and_xor (type *ptr, type value, ...)
+type __sync_fetch_and_nand (type *ptr, type value, ...)
+
+
+type __sync_add_and_fetch (type *ptr, type value, ...)
+type __sync_sub_and_fetch (type *ptr, type value, ...)
+type __sync_or_and_fetch (type *ptr, type value, ...)
+type __sync_and_and_fetch (type *ptr, type value, ...)
+type __sync_xor_and_fetch (type *ptr, type value, ...)
+type __sync_nand_and_fetch (type *ptr, type value, ...)
+  
+  
+    
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
